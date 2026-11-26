@@ -18,5 +18,11 @@ public class Course
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
+    public int? TeacherId { get; set; }
+
+    public Teacher? Teacher { get; set; }
+
     public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
+
+    public ICollection<CourseEnrollment> Enrollments { get; set; } = new List<CourseEnrollment>();
 }

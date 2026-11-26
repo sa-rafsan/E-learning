@@ -9,11 +9,17 @@ public static class CourseDataSeeder
         ApplicationDbContext dbContext,
         CancellationToken cancellationToken = default)
     {
-        await dbContext.Database.EnsureCreatedAsync(cancellationToken);
         if (await dbContext.Courses.AnyAsync(cancellationToken))
         {
             return;
         }
+
+        var teachersByName = await dbContext.Teachers
+            .ToDictionaryAsync(t => t.FullName, t => t.Id, cancellationToken);
+
+        teachersByName.TryGetValue("Ayesha Rahman", out var ayeshaId);
+        teachersByName.TryGetValue("Marcus Chen", out var marcusId);
+        teachersByName.TryGetValue("Nadia Williams", out var nadiaId);
 
         dbContext.Courses.AddRange(
             new Course
@@ -21,6 +27,7 @@ public static class CourseDataSeeder
                 Title = "Web Development Foundations",
                 Description = "Build a strong foundation in the web: how browsers work, how pages are structured, and how to bring ideas to life with code.",
                 Instructor = "Ayesha Rahman",
+                TeacherId = ayeshaId > 0 ? ayeshaId : null,
                 Category = "Development",
                 DurationHours = 8,
                 IsPublished = true,
@@ -36,6 +43,7 @@ public static class CourseDataSeeder
                 Title = "Product Design Essentials",
                 Description = "Learn a practical design process, from understanding people and mapping a problem to creating and testing a useful solution.",
                 Instructor = "Marcus Chen",
+                TeacherId = marcusId > 0 ? marcusId : null,
                 Category = "Design",
                 DurationHours = 6,
                 IsPublished = true,
@@ -51,6 +59,7 @@ public static class CourseDataSeeder
                 Title = "Data Literacy for Everyone",
                 Description = "Read charts with a critical eye, ask better questions of data, and share findings in a way that supports good decisions.",
                 Instructor = "Nadia Williams",
+                TeacherId = nadiaId > 0 ? nadiaId : null,
                 Category = "Data",
                 DurationHours = 5,
                 IsPublished = true,

@@ -1,4 +1,14 @@
-﻿<!DOCTYPE html>
+﻿@using ELearning.Domain.Enums
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var hideChrome = ViewData["HideChrome"] as bool? == true;
+    var dashboardController = User.IsInRole(nameof(UserRole.Admin))
+        ? "Admin"
+        : User.IsInRole(nameof(UserRole.Teacher))
+            ? "Teacher"
+            : "Student";
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,34 +17,53 @@
     <title>@ViewData["Title"] | E-learning</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ELearning.Web.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header class="site-header">
-        <nav class="site-nav container" aria-label="Main navigation">
-            <a class="brand" asp-controller="Home" asp-action="Index" aria-label="E-learning home">
-                <span class="brand-mark">e</span>
-                <span>learning<span class="brand-period">.</span></span>
-            </a>
-            <div class="nav-links">
-                <a asp-controller="Courses" asp-action="Index">Explore courses</a>
-                <a class="nav-cta" asp-controller="Courses" asp-action="Index">Start learning <span aria-hidden="true">&rarr;</span></a>
-            </div>
-        </nav>
-    </header>
+    @if (!hideChrome)
+    {
+        <header class="site-header">
+            <nav class="site-nav container" aria-label="Main navigation">
+                <a class="brand" asp-controller="Home" asp-action="Index" aria-label="E-learning home">
+                    <span class="brand-mark">e</span>
+                    <span>learning<span class="brand-period">.</span></span>
+                </a>
+                <div class="nav-links d-flex align-items-center gap-3">
+                    <a asp-controller="Courses" asp-action="Index">Explore courses</a>
+                    @if (isAuthenticated)
+                    {
+                        <a asp-controller="@dashboardController" asp-action="Dashboard">Dashboard</a>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline m-0">
+                            <button type="submit" class="btn btn-outline-dark btn-sm rounded-pill px-3">Sign out</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a class="nav-cta" asp-controller="Account" asp-action="Login">Sign in <span aria-hidden="true">&rarr;</span></a>
+                    }
+                </div>
+            </nav>
+        </header>
+    }
     <main>
         @RenderBody()
     </main>
-    <footer class="site-footer">
-        <div class="container footer-inner">
-            <a class="brand footer-brand" asp-controller="Home" asp-action="Index">
-                <span class="brand-mark">e</span>
-                <span>learning<span class="brand-period">.</span></span>
-            </a>
-            <p>Make room for what’s next.</p>
-            <span>&copy; @DateTime.UtcNow.Year E-learning</span>
-        </div>
-    </footer>
+    @if (!hideChrome)
+    {
+        <footer class="site-footer">
+            <div class="container footer-inner">
+                <a class="brand footer-brand" asp-controller="Home" asp-action="Index">
+                    <span class="brand-mark">e</span>
+                    <span>learning<span class="brand-period">.</span></span>
+                </a>
+                <p>Make room for what’s next.</p>
+                <span>&copy; @DateTime.UtcNow.Year E-learning</span>
+            </div>
+        </footer>
+    }
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

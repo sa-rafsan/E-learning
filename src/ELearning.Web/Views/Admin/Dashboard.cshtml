@@ -1,0 +1,845 @@
+@{
+    ViewData["Title"] = "Academic Dashboard";
+    ViewData["HideChrome"] = true;
+}
+
+<div class="admin-shell">
+    <!-- Left Dark Navy Sidebar -->
+    <aside class="admin-sidebar">
+        <div>
+            <div class="admin-sidebar-brand">
+                <span class="admin-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                    </svg>
+                </span>
+                <div>
+                    <div class="fw-bold lh-sm text-white">E-Learning</div>
+                    <div class="small text-secondary lh-sm" style="font-size: 0.75rem;">Academic Portal</div>
+                </div>
+            </div>
+
+            <div class="admin-nav-label">MAIN MENU</div>
+            <ul class="admin-nav-list">
+                <li class="admin-nav-item">
+                    <button type="button" class="admin-nav-link active" data-section="overview">
+                        <span>Dashboard</span>
+                    </button>
+                </li>
+                <li class="admin-nav-item">
+                    <button type="button" class="admin-nav-link" data-section="teachers">
+                        <span>Teachers</span>
+                    </button>
+                </li>
+                <li class="admin-nav-item">
+                    <button type="button" class="admin-nav-link" data-section="students">
+                        <span>Students</span>
+                    </button>
+                </li>
+                <li class="admin-nav-item">
+                    <button type="button" class="admin-nav-link" data-section="courses">
+                        <span>Courses</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="admin-sidebar-footer">
+            <div class="admin-user-pill">
+                <span class="admin-avatar">SA</span>
+                <div class="min-w-0 flex-grow-1">
+                    <div class="small fw-semibold text-white text-truncate">System Admin</div>
+                    <div class="text-info" style="font-size: 0.72rem;">Admin Account</div>
+                </div>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-link text-secondary p-0" title="Sign Out" aria-label="Sign Out">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main">
+        <!-- Top Header Bar -->
+        <header class="admin-topbar">
+            <div>
+                <h1 class="h4 fw-bold mb-0 text-dark">Academic Dashboard</h1>
+                <p class="text-muted small mb-0">Overview of university enrollment, courses, and user metrics</p>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <span class="admin-pill-badge">Term: 2026-2027</span>
+                <span class="admin-pill-badge">Admin</span>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline m-0">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">Sign Out</button>
+                </form>
+            </div>
+        </header>
+
+        <div class="p-3 p-md-4">
+            <div id="adminToastContainer" class="admin-toast-container" aria-live="polite"></div>
+            <div id="adminAlertContainer" class="mb-3"></div>
+
+            <!-- 5 KPI Cards Row -->
+            <div class="row g-3 mb-4" id="sectionOverview">
+                <div class="col-sm-6 col-xl">
+                    <div class="kpi-card d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="kpi-label mb-2">Total Users</div>
+                            <div class="kpi-value mb-1" id="statTotalUsers">0</div>
+                            <div class="small text-success fw-medium">All registered accounts</div>
+                        </div>
+                        <span class="kpi-icon-box kpi-icon-blue">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl">
+                    <div class="kpi-card d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="kpi-label mb-2">Active Accounts</div>
+                            <div class="kpi-value mb-1" id="statActiveUsers">0</div>
+                            <div class="small text-success fw-medium">Verified active status</div>
+                        </div>
+                        <span class="kpi-icon-box kpi-icon-green">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" /></svg>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl">
+                    <div class="kpi-card d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="kpi-label mb-2">Students</div>
+                            <div class="kpi-value mb-1" id="statStudents">0</div>
+                            <div class="small text-muted">Batch 70 enrollments</div>
+                        </div>
+                        <span class="kpi-icon-box kpi-icon-amber">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl">
+                    <div class="kpi-card d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="kpi-label mb-2">Teachers</div>
+                            <div class="kpi-value mb-1" id="statTeachers">0</div>
+                            <div class="small text-muted">Active faculty</div>
+                        </div>
+                        <span class="kpi-icon-box kpi-icon-purple">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl">
+                    <div class="kpi-card d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="kpi-label mb-2">Total Courses</div>
+                            <div class="kpi-value mb-1" id="statCourses">0</div>
+                            <div class="small text-success fw-medium">Published &amp; assigned</div>
+                        </div>
+                        <span class="kpi-icon-box kpi-icon-teal">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multi-Chart Analytics Grid (3 + 2 Layout) -->
+            <div id="sectionCharts">
+                <div class="row g-3 mb-3">
+                    <!-- Chart 1: Attendance Distribution Donut -->
+                    <div class="col-lg-4">
+                        <div class="chart-card">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h2 class="h6 fw-bold mb-0">Attendance Distribution</h2>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Classroom &bull; Live Analytics</div>
+                                </div>
+                                <span class="analytics-badge">Live</span>
+                            </div>
+                            <div class="row g-2 align-items-center">
+                                <div class="col-5 d-flex justify-content-center" id="chartAttendanceDonut"></div>
+                                <div class="col-7" id="chartAttendanceLegend"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Batch 70 Section Active vs Inactive Bar Chart -->
+                    <div class="col-lg-4">
+                        <div class="chart-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h2 class="h6 fw-bold mb-0">Section Active vs Inactive</h2>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Batch 70 &bull; Section Breakdown</div>
+                                </div>
+                                <span class="analytics-badge">Sections</span>
+                            </div>
+                            <div class="grouped-bar-area" id="chartSectionGroupedBars"></div>
+                            <div class="d-flex justify-content-center gap-3 small text-muted mt-2">
+                                <span><span style="color:#10b981;">&#9632;</span> Active</span>
+                                <span><span style="color:#ef4444;">&#9632;</span> Inactive</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart 3: Role & Account Breakdown Donut -->
+                    <div class="col-lg-4">
+                        <div class="chart-card">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h2 class="h6 fw-bold mb-0">Role &amp; Account Analysis</h2>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Directory &bull; Role Breakdown</div>
+                                </div>
+                                <span class="analytics-badge">Users</span>
+                            </div>
+                            <div class="row g-2 align-items-center">
+                                <div class="col-5 d-flex justify-content-center" id="chartRoleDonut"></div>
+                                <div class="col-7" id="chartRoleBreakdown"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <!-- Chart 4: Academic & Course Pipeline (2x2 Tiles) -->
+                    <div class="col-lg-6">
+                        <div class="chart-card">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h2 class="h6 fw-bold mb-0">Academic Operations Pipeline</h2>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Courses &bull; Assignments &amp; Sessions</div>
+                                </div>
+                                <span class="analytics-badge">Metrics</span>
+                            </div>
+                            <div class="row g-2" id="chartAcademicPipeline"></div>
+                        </div>
+                    </div>
+
+                    <!-- Chart 5: Course Enrollment Area Trend -->
+                    <div class="col-lg-6">
+                        <div class="chart-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h2 class="h6 fw-bold mb-0">Course Enrollment &amp; Duration Trend</h2>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Courses &bull; Area Analytics</div>
+                                </div>
+                                <span class="analytics-badge">Area</span>
+                            </div>
+                            <div id="chartCourseAreaTrend"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Courses & Assignments Table -->
+            <div class="user-table-card p-3 p-md-4 mb-4 d-none" id="sectionCourses">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h2 class="h5 fw-bold mb-0">Course List &amp; Assignments</h2>
+                        <p class="text-muted small mb-0">Create courses and assign Teachers and Students.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" id="refreshCoursesBtn" class="btn btn-outline-secondary btn-sm">Refresh</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="openCreateCourseBtn">+ Add Course</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Course Title</th>
+                                <th>Category</th>
+                                <th>Duration</th>
+                                <th>Assigned Teacher</th>
+                                <th>Enrolled Students</th>
+                                <th>Status</th>
+                                <th class="text-end">Assignments</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coursesTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">Loading courses...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Separate Teacher List Section -->
+            <div id="sectionTeachers" class="d-none">
+                <div class="user-table-card p-3 mb-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div>
+                            <h2 class="h5 fw-bold mb-0">Teacher List</h2>
+                            <p class="text-muted small mb-0">Manage faculty accounts, status, and credentials.</p>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-sm" id="openCreateTeacherBtn">+ Add Teacher</button>
+                    </div>
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-6">
+                            <input type="search" id="teacherSearchInput" class="form-control" placeholder="Search teachers by name, email, or phone..." />
+                        </div>
+                        <div class="col-md-4">
+                            <select id="teacherStatusFilter" class="form-select">
+                                <option value="">All Statuses</option>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" id="resetTeacherFiltersBtn" class="btn btn-outline-secondary w-100">Reset</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-table-card p-3 p-md-4 mb-4">
+                    <div class="small text-muted mb-3">
+                        Total Teachers: <strong class="text-dark" id="teachersTotalCount">0</strong>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle dir-table mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Teacher Details</th>
+                                    <th>Contact Info</th>
+                                    <th>Status</th>
+                                    <th>Created Date</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teachersTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">Loading teachers...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add New Student Section -->
+            <div id="sectionAddStudent" class="d-none">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h2 class="h4 fw-bold mb-0 text-dark">Add New Student</h2>
+                        <p class="text-muted small mb-0">Enter complete student personal, contact, and academic details</p>
+                    </div>
+                    <button type="button" id="backToDirectoryBtn" class="btn btn-outline-secondary btn-sm">
+                        &larr; Back to Directory
+                    </button>
+                </div>
+
+                <form id="createStudentForm" novalidate>
+                    <div id="createStudentFormError" class="alert alert-danger d-none"></div>
+
+                    <!-- Card 1: Student Identification & Status -->
+                    <div class="user-table-card p-3 p-md-4 mb-3">
+                        <div class="mb-3">
+                            <h3 class="h6 fw-bold mb-0 text-dark">Student Identification &amp; Status</h3>
+                            <p class="text-muted small mb-0">Unique registration ID, department/batch assignment, and active status.</p>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="studentIdInput" class="form-label small fw-semibold">Student ID <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="studentIdInput" name="StudentId" placeholder="e.g. 0325704750" />
+                                <div class="invalid-feedback" id="studentIdInputError"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="studentDepartment" class="form-label small fw-semibold">Department / Batch &amp; Section</label>
+                                <input type="text" class="form-control" id="studentDepartment" name="Department" placeholder="e.g. Batch 70 - Section A" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Student Status <span class="text-danger">*</span></label>
+                                <input type="hidden" id="studentStatus" name="Status" value="1" />
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <button type="button" class="status-pill-btn active-status" data-status-val="1">Active Student</button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button type="button" class="status-pill-btn" data-status-val="2">Inactive</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Personal & Contact Information -->
+                    <div class="user-table-card p-3 p-md-4 mb-3">
+                        <div class="mb-3">
+                            <h3 class="h6 fw-bold mb-0 text-dark">Personal &amp; Contact Information</h3>
+                            <p class="text-muted small mb-0">Student identity, university email, and phone number.</p>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="studentFullName" class="form-label small fw-semibold">Full Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="studentFullName" name="FullName" placeholder="e.g. Sarah Jenkins" />
+                                <div class="invalid-feedback" id="studentFullNameError"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="studentEmail" class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="studentEmail" name="Email" placeholder="student@wub.edu.bd" />
+                                <div class="invalid-feedback" id="studentEmailError"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="studentPhone" class="form-label small fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="studentPhone" name="PhoneNumber" placeholder="e.g. 0325704750" />
+                                <div class="invalid-feedback" id="studentPhoneError"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Account Credentials -->
+                    <div class="user-table-card p-3 p-md-4 mb-3">
+                        <div class="mb-3">
+                            <h3 class="h6 fw-bold mb-0 text-dark">Account Credentials</h3>
+                            <p class="text-muted small mb-0">Initial login password (minimum 8 characters).</p>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="studentPassword" class="form-label small fw-semibold">Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="studentPassword" name="Password" />
+                                <div class="invalid-feedback" id="studentPasswordError"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="studentConfirmPassword" class="form-label small fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="studentConfirmPassword" name="ConfirmPassword" />
+                                <div class="invalid-feedback" id="studentConfirmPasswordError"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" id="cancelAddStudentBtn" class="btn btn-outline-secondary">Cancel</button>
+                        <button type="button" id="resetAddStudentBtn" class="btn btn-outline-secondary">Reset Form</button>
+                        <button type="submit" class="btn btn-primary px-4" id="createStudentSubmitBtn">Save Student Record</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Separate Student List Section -->
+            <div id="sectionStudents" class="d-none">
+                <!-- Filter Bar Card -->
+                <div class="user-table-card p-3 mb-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div>
+                            <h2 class="h5 fw-bold mb-0">Student List</h2>
+                            <p class="text-muted small mb-0">Manage student records, filter by section, or add a new student.</p>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-sm" id="openCreateStudentBtn">+ Add Student</button>
+                    </div>
+                    <div class="row g-2 align-items-center">
+                        <div class="col-lg-5">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                                </span>
+                                <input type="search"
+                                       id="userSearchInput"
+                                       class="form-control border-start-0"
+                                       placeholder="Search by name, student ID, or email..." />
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-lg-3">
+                            <select id="userSectionFilter" class="form-select">
+                                <option value="">All Sections / Depts</option>
+                                <option value="Section A">Batch 70 - Section A</option>
+                                <option value="Section B">Batch 70 - Section B</option>
+                                <option value="Section C">Batch 70 - Section C</option>
+                                <option value="Section D">Batch 70 - Section D</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-lg-2">
+                            <select id="userStatusFilter" class="form-select">
+                                <option value="">All Statuses</option>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-lg-2">
+                            <button type="button" id="resetDirectoryFiltersBtn" class="btn btn-outline-secondary w-100">Reset</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Directory Table Card -->
+                <div class="user-table-card p-3 p-md-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div class="small text-muted">
+                            Total Records: <strong class="text-dark" id="directoryTotalCount">0</strong> users
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small text-muted">Show:</span>
+                            <select id="directoryPageSize" class="form-select form-select-sm" style="width: auto;">
+                                <option value="10" selected>10 per page</option>
+                                <option value="25">25 per page</option>
+                                <option value="50">50 per page</option>
+                                <option value="100">100 per page</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle dir-table mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User Details</th>
+                                    <th>Role &amp; Department</th>
+                                    <th>Contact Info</th>
+                                    <th>Status</th>
+                                    <th>Created Date</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">Loading users...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 mt-2 border-top">
+                        <div class="small text-muted" id="directoryPageInfo">Showing 0 of 0</div>
+                        <nav aria-label="Directory pagination">
+                            <ul class="pagination pagination-sm mb-0" id="directoryPagination"></ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Teacher Modal -->
+<div class="modal fade" id="createTeacherModal" tabindex="-1" aria-labelledby="createTeacherModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="createTeacherForm" novalidate>
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="createTeacherModalLabel">Create Teacher Account</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="createTeacherFormError" class="alert alert-danger d-none"></div>
+                    <div class="mb-3">
+                        <label for="teacherFullName" class="form-label">Full Name *</label>
+                        <input type="text" class="form-control" id="teacherFullName" name="FullName" />
+                        <div class="invalid-feedback" id="teacherFullNameError"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="teacherEmail" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="teacherEmail" name="Email" />
+                        <div class="invalid-feedback" id="teacherEmailError"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="teacherPhone" class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" id="teacherPhone" name="PhoneNumber" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="teacherPassword" class="form-label">Password *</label>
+                        <input type="password" class="form-control" id="teacherPassword" name="Password" />
+                        <div class="invalid-feedback" id="teacherPasswordError"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="teacherConfirmPassword" class="form-label">Confirm Password *</label>
+                        <input type="password" class="form-control" id="teacherConfirmPassword" name="ConfirmPassword" />
+                        <div class="invalid-feedback" id="teacherConfirmPasswordError"></div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="teacherStatus" class="form-label">Status</label>
+                        <select class="form-select" id="teacherStatus" name="Status">
+                            <option value="1">Active</option>
+                            <option value="2">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark" id="createTeacherSubmitBtn">Create Teacher</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Teacher Modal -->
+<div class="modal fade" id="editTeacherModal" tabindex="-1" aria-labelledby="editTeacherModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editTeacherForm" novalidate>
+                <input type="hidden" id="editTeacherId" />
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="editTeacherModalLabel">Edit Teacher</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="editTeacherFormError" class="alert alert-danger d-none"></div>
+                    <div class="mb-3">
+                        <label for="editTeacherFullName" class="form-label">Full Name *</label>
+                        <input type="text" class="form-control" id="editTeacherFullName" />
+                        <div class="invalid-feedback" id="editTeacherFullNameError"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTeacherEmail" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="editTeacherEmail" />
+                        <div class="invalid-feedback" id="editTeacherEmailError"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTeacherPhone" class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" id="editTeacherPhone" />
+                    </div>
+                    <div class="mb-2">
+                        <label for="editTeacherStatus" class="form-label">Status</label>
+                        <select class="form-select" id="editTeacherStatus">
+                            <option value="1">Active</option>
+                            <option value="2">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Student Modal -->
+<div class="modal fade" id="editStudentModal" tabindex="-1" aria-labelledby="editStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editStudentForm" novalidate>
+                <input type="hidden" id="editStudentId" />
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="editStudentModalLabel">Edit Student</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="editStudentFormError" class="alert alert-danger d-none"></div>
+                    <div class="mb-3">
+                        <label for="editStudentFullName" class="form-label">Full Name *</label>
+                        <input type="text" class="form-control" id="editStudentFullName" />
+                        <div class="invalid-feedback" id="editStudentFullNameError"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editStudentEmail" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="editStudentEmail" />
+                        <div class="invalid-feedback" id="editStudentEmailError"></div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label for="editStudentCode" class="form-label">Student ID *</label>
+                            <input type="text" class="form-control" id="editStudentCode" />
+                            <div class="invalid-feedback" id="editStudentCodeError"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editStudentDepartment" class="form-label">Department</label>
+                            <input type="text" class="form-control" id="editStudentDepartment" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editStudentPhone" class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" id="editStudentPhone" />
+                    </div>
+                    <div class="mb-2">
+                        <label for="editStudentStatus" class="form-label">Status</label>
+                        <select class="form-select" id="editStudentStatus">
+                            <option value="1">Active</option>
+                            <option value="2">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View User Details Modal -->
+<div class="modal fade" id="viewUserModal" tabindex="-1" aria-labelledby="viewUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5 fw-bold" id="viewUserModalLabel">User Details</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="viewUserModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="resetPasswordForm" novalidate>
+                <input type="hidden" id="resetPasswordUserId" />
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="resetPasswordModalLabel">Reset User Password</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="resetPasswordFormError" class="alert alert-danger d-none"></div>
+                    <p class="small text-muted">Resetting password for <strong id="resetPasswordUserName"></strong>.</p>
+                    <div class="mb-3">
+                        <label for="resetNewPassword" class="form-label">New Password *</label>
+                        <input type="password" class="form-control" id="resetNewPassword" />
+                        <div class="invalid-feedback" id="resetNewPasswordError"></div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="resetConfirmPassword" class="form-label">Confirm Password *</label>
+                        <input type="password" class="form-control" id="resetConfirmPassword" />
+                        <div class="invalid-feedback" id="resetConfirmPasswordError"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark">Reset Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Create Course Modal -->
+<div class="modal fade" id="createCourseModal" tabindex="-1" aria-labelledby="createCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="createCourseForm" novalidate>
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="createCourseModalLabel">Add New Course</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="createCourseFormError" class="alert alert-danger d-none"></div>
+                    <div class="mb-3">
+                        <label for="courseTitle" class="form-label">Course Title *</label>
+                        <input type="text" class="form-control" id="courseTitle" />
+                        <div class="invalid-feedback" id="courseTitleError"></div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label for="courseCategory" class="form-label">Category *</label>
+                            <input type="text" class="form-control" id="courseCategory" placeholder="e.g. Development" />
+                            <div class="invalid-feedback" id="courseCategoryError"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="courseDuration" class="form-label">Duration (Hours) *</label>
+                            <input type="number" class="form-control" id="courseDuration" min="1" value="6" />
+                            <div class="invalid-feedback" id="courseDurationError"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="courseTeacher" class="form-label">Assign Teacher (Optional)</label>
+                        <select class="form-select" id="courseTeacher">
+                            <option value="">-- Assign Later --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="courseDescription" class="form-label">Description *</label>
+                        <textarea class="form-control" id="courseDescription" rows="3"></textarea>
+                        <div class="invalid-feedback" id="courseDescriptionError"></div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="courseIsPublished" checked />
+                        <label class="form-check-label" for="courseIsPublished">Published</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Course</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Teacher Modal -->
+<div class="modal fade" id="assignTeacherModal" tabindex="-1" aria-labelledby="assignTeacherModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="assignTeacherForm" novalidate>
+                <input type="hidden" id="assignTeacherCourseId" />
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="assignTeacherModalLabel">Assign Teacher to Course</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="assignTeacherFormError" class="alert alert-danger d-none"></div>
+                    <p class="small text-muted">Course: <strong id="assignTeacherCourseTitle"></strong></p>
+                    <div class="mb-2">
+                        <label for="assignTeacherSelect" class="form-label">Select Teacher *</label>
+                        <select class="form-select" id="assignTeacherSelect"></select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark">Assign Teacher</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Students Modal -->
+<div class="modal fade" id="assignStudentsModal" tabindex="-1" aria-labelledby="assignStudentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="assignStudentsForm" novalidate>
+                <input type="hidden" id="assignStudentsCourseId" />
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="assignStudentsModalLabel">Assign Students to Course</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="assignStudentsFormError" class="alert alert-danger d-none"></div>
+                    <p class="small text-muted mb-3">Course: <strong id="assignStudentsCourseTitle"></strong></p>
+
+                    <div class="row g-2 align-items-end mb-3 p-3 bg-light rounded">
+                        <div class="col-md-4">
+                            <label for="enrollBatchInput" class="form-label small fw-semibold">Enroll by Batch (Optional)</label>
+                            <input type="text" class="form-control form-control-sm" id="enrollBatchInput" placeholder="e.g. 70" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="enrollSectionSelect" class="form-label small fw-semibold">Section</label>
+                            <select class="form-select form-select-sm" id="enrollSectionSelect">
+                                <option value="">All Sections in Batch</option>
+                                <option value="A">Section A</option>
+                                <option value="B">Section B</option>
+                                <option value="C">Section C</option>
+                                <option value="D">Section D</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 small text-muted">
+                            Leave batch empty to select individual students below.
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <input type="search" id="enrollStudentSearch" class="form-control form-control-sm" placeholder="Filter students by ID, name, or email..." />
+                    </div>
+                    <div id="enrollStudentsList" class="border rounded p-2" style="max-height: 260px; overflow-y: auto;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark">Assign Students</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin-users.js" asp-append-version="true"></script>
+    <script src="~/js/admin-courses.js" asp-append-version="true"></script>
+    <script src="~/js/admin-analytics.js" asp-append-version="true"></script>
+}

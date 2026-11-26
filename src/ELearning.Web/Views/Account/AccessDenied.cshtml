@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<section class="auth-wrapper">
+    <div class="auth-card p-4 p-md-5 text-center">
+        <div class="mb-3">
+            <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill">403 Forbidden</span>
+        </div>
+        <h1 class="h4 fw-bold mb-2">Access Denied</h1>
+        <p class="text-muted mb-4">
+            You do not have permission to view this page with your current role.
+        </p>
+        <div class="d-flex justify-content-center gap-2">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Home</a>
+            <a asp-controller="Account" asp-action="Login" class="btn btn-dark">Go to Dashboard</a>
+        </div>
+    </div>
+</section>
+

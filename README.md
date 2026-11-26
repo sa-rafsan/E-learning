@@ -1,20 +1,26 @@
-# E-learning
+# E-Learning Platform
 
-A clean-architecture ASP.NET Core MVC learning platform starter. The initial MVP includes a searchable course catalog, course detail pages with lesson outlines, and a SQLite database seeded with sample courses on first run.
+An ASP.NET Core MVC & Web API E-Learning Platform built with Clean Architecture, Entity Framework Core, ASP.NET Core Identity, JWT Authentication, Repository Pattern, Bootstrap 5, and jQuery.
 
-## Run locally
+## Secure Configuration (Admin & JWT)
 
+Do **not** commit production passwords or JWT signing keys to GitHub. `appsettings.json` intentionally leaves `AdminSettings` and `JwtSettings:SecretKey` empty; `appsettings.Development.json` contains placeholder development values only.
+
+Configure production or local secrets using **environment variables** or **.NET User Secrets**:
+
+### Environment Variables
 ```bash
-dotnet run --project src/ELearning.Web
+AdminSettings__FullName="Platform Administrator"
+AdminSettings__Email="admin@yourdomain.com"
+AdminSettings__Password="StrongAdminPassword123!"
+JwtSettings__SecretKey="YourMinimum32CharacterProductionSecretKey!"
 ```
 
-Open the local URL printed by ASP.NET Core. The database file (`elearning.db`) is created in the working directory on first launch.
+### .NET User Secrets (Development)
+```bash
+dotnet user-secrets set "AdminSettings:Email" "admin@yourdomain.com" --project src/ELearning.Web
+dotnet user-secrets set "AdminSettings:Password" "StrongAdminPassword123!" --project src/ELearning.Web
+dotnet user-secrets set "JwtSettings:SecretKey" "YourMinimum32CharacterSecretKey!" --project src/ELearning.Web
+```
 
-## Project structure
-
-- `ELearning.Domain` — course and lesson entities
-- `ELearning.Application` — course DTOs, service and repository contracts, and course service
-- `ELearning.Infrastructure` — EF Core SQLite context, seed data, and repository
-- `ELearning.Web` — ASP.NET Core MVC application and Razor views
-
-The solution targets .NET 10. C# types are kept in separate files with namespaces aligned to their folders.
+On startup, `AdminDataSeeder` validates `AdminSettings`, seeds the `Admin`, `Teacher`, and `Student` roles, and creates (or synchronizes) the single fixed Admin account without creating duplicates.
