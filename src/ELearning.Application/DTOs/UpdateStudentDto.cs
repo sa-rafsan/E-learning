@@ -15,5 +15,7 @@ public sealed class UpdateStudentDto
     public string? Department { get; set; }
 
     public UserStatus Status { get; set; } = UserStatus.Active;
+
+    public string? ImagePath { get; set; }
 }
 

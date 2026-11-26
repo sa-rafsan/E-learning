@@ -13,5 +13,7 @@ public sealed class CreateCourseDto
     public bool IsPublished { get; set; } = true;
 
     public int? TeacherId { get; set; }
+
+    public string? ImagePath { get; set; }
 }
 

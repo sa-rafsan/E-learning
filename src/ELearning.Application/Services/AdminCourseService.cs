@@ -18,6 +18,19 @@ public sealed class AdminCourseService(
         return ServiceResult<IReadOnlyList<AdminCourseDto>>.Ok(courses.Select(MapToDto).ToList());
     }
 
+    public async Task<ServiceResult<AdminCourseDto>> GetCourseByIdAsync(
+        int courseId,
+        CancellationToken cancellationToken = default)
+    {
+        var course = await courseRepository.GetCourseWithEnrollmentsAsync(courseId, cancellationToken);
+        if (course is null)
+        {
+            return ServiceResult<AdminCourseDto>.Fail("Course not found.", 404);
+        }
+
+        return ServiceResult<AdminCourseDto>.Ok(MapToDto(course));
+    }
+
     public async Task<ServiceResult<AdminCourseDto>> CreateCourseAsync(
         CreateCourseDto dto,
         CancellationToken cancellationToken = default)
@@ -51,6 +64,7 @@ public sealed class AdminCourseService(
             IsPublished = dto.IsPublished,
             TeacherId = teacher?.Id,
             Instructor = teacher?.FullName ?? "TBA",
+            ImagePath = string.IsNullOrWhiteSpace(dto.ImagePath) ? null : dto.ImagePath.Trim(),
             CreatedAtUtc = DateTime.UtcNow
         };
 
@@ -59,6 +73,54 @@ public sealed class AdminCourseService(
 
         course.Teacher = teacher;
         return ServiceResult<AdminCourseDto>.Ok(MapToDto(course), 201);
+    }
+
+    public async Task<ServiceResult<AdminCourseDto>> UpdateCourseAsync(
+        int courseId,
+        CreateCourseDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var validation = await createValidator.ValidateAsync(dto, cancellationToken);
+        if (!validation.IsValid)
+        {
+            var errors = validation.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+
+            return ServiceResult<AdminCourseDto>.Fail("Validation failed.", 400, errors);
+        }
+
+        var course = await courseRepository.GetCourseWithEnrollmentsAsync(courseId, cancellationToken);
+        if (course is null)
+        {
+            return ServiceResult<AdminCourseDto>.Fail("Course not found.", 404);
+        }
+
+        Teacher? teacher = null;
+        if (dto.TeacherId.HasValue && dto.TeacherId.Value > 0)
+        {
+            teacher = await courseRepository.GetTeacherByIdAsync(dto.TeacherId.Value, cancellationToken);
+            if (teacher is null)
+            {
+                return ServiceResult<AdminCourseDto>.Fail("Selected teacher not found.", 404);
+            }
+        }
+
+        course.Title = dto.Title.Trim();
+        course.Description = dto.Description.Trim();
+        course.Category = dto.Category.Trim();
+        course.DurationHours = dto.DurationHours;
+        course.IsPublished = dto.IsPublished;
+        course.TeacherId = teacher?.Id;
+        course.Instructor = teacher?.FullName ?? "TBA";
+        if (!string.IsNullOrWhiteSpace(dto.ImagePath))
+        {
+            course.ImagePath = dto.ImagePath.Trim();
+        }
+
+        await courseRepository.SaveChangesAsync(cancellationToken);
+        course.Teacher = teacher;
+        return ServiceResult<AdminCourseDto>.Ok(MapToDto(course));
     }
 
     public async Task<ServiceResult<AdminCourseDto>> AssignTeacherAsync(
@@ -172,6 +234,7 @@ public sealed class AdminCourseService(
         IsPublished = course.IsPublished,
         TeacherId = course.TeacherId,
         TeacherName = course.Teacher?.FullName ?? course.Instructor,
+        ImagePath = course.ImagePath,
         EnrolledStudentsCount = course.Enrollments.Count,
         EnrolledStudentIds = course.Enrollments.Select(e => e.StudentId).ToList()
     };

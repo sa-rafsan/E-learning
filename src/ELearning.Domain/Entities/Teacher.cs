@@ -16,6 +16,8 @@ public class Teacher
 
     public string? Designation { get; set; }
 
+    public string? ImagePath { get; set; }
+
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAtUtc { get; set; }

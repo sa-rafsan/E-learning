@@ -132,6 +132,7 @@ public sealed class UserRepository(
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 Department = user.Department,
+                ImagePath = user.ImagePath,
                 CreatedAtUtc = user.CreatedAtUtc
             };
             await DbContext.Teachers.AddAsync(teacherProfile, cancellationToken);
@@ -148,6 +149,7 @@ public sealed class UserRepository(
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 Department = user.Department,
+                ImagePath = user.ImagePath,
                 CreatedAtUtc = user.CreatedAtUtc
             };
             await DbContext.Students.AddAsync(studentProfile, cancellationToken);
@@ -209,6 +211,10 @@ public sealed class UserRepository(
                 teacherProfile.Email = user.Email;
                 teacherProfile.PhoneNumber = user.PhoneNumber;
                 teacherProfile.Department = user.Department;
+                if (user.ImagePath is not null)
+                {
+                    teacherProfile.ImagePath = user.ImagePath;
+                }
                 teacherProfile.UpdatedAtUtc = now;
                 await DbContext.SaveChangesAsync(cancellationToken);
                 appUser.TeacherProfile = teacherProfile;
@@ -226,6 +232,10 @@ public sealed class UserRepository(
                 studentProfile.Email = user.Email;
                 studentProfile.PhoneNumber = user.PhoneNumber;
                 studentProfile.Department = user.Department;
+                if (user.ImagePath is not null)
+                {
+                    studentProfile.ImagePath = user.ImagePath;
+                }
                 studentProfile.UpdatedAtUtc = now;
                 await DbContext.SaveChangesAsync(cancellationToken);
                 appUser.StudentProfile = studentProfile;
@@ -269,6 +279,7 @@ public sealed class UserRepository(
         Status = appUser.Status,
         StudentId = appUser.StudentProfile?.StudentId ?? appUser.StudentId,
         Department = appUser.StudentProfile?.Department ?? appUser.TeacherProfile?.Department ?? appUser.Department,
+        ImagePath = appUser.StudentProfile?.ImagePath ?? appUser.TeacherProfile?.ImagePath,
         CreatedAtUtc = appUser.CreatedAtUtc,
         UpdatedAtUtc = appUser.UpdatedAtUtc
     };

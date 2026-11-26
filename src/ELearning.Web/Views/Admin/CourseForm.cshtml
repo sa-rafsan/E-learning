@@ -1,0 +1,115 @@
+@{
+    var courseId = ViewData["CourseId"] as int?;
+    var isEdit = courseId.HasValue;
+    ViewData["Title"] = isEdit ? "Edit Course" : "Add New Course";
+    ViewData["HideChrome"] = true;
+}
+
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <div>
+            <div class="admin-sidebar-brand">
+                <span class="admin-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
+                </span>
+                <div>
+                    <div class="fw-bold lh-sm text-white">E-Learning</div>
+                    <div class="small text-secondary lh-sm" style="font-size: 0.75rem;">Academic Portal</div>
+                </div>
+            </div>
+            <div class="admin-nav-label">MAIN MENU</div>
+            <ul class="admin-nav-list">
+                <li class="admin-nav-item"><a href="/Admin/Dashboard" class="admin-nav-link text-decoration-none"><span>Dashboard</span></a></li>
+                <li class="admin-nav-item"><a href="/Admin/Dashboard#courses" class="admin-nav-link active text-decoration-none"><span>Courses</span></a></li>
+                <li class="admin-nav-item"><a href="/Admin/TeacherForm" class="admin-nav-link text-decoration-none"><span>+ Add Teacher</span></a></li>
+                <li class="admin-nav-item"><a href="/Admin/StudentForm" class="admin-nav-link text-decoration-none"><span>+ Add Student</span></a></li>
+            </ul>
+        </div>
+        <div class="admin-sidebar-footer">
+            <div class="admin-user-pill">
+                <span class="admin-avatar">SA</span>
+                <div class="min-w-0 flex-grow-1">
+                    <div class="small fw-semibold text-white">System Admin</div>
+                    <div class="text-info" style="font-size: 0.72rem;">Admin Account</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="admin-main">
+        <header class="admin-topbar">
+            <div>
+                <h1 class="h4 fw-bold mb-0 text-dark">@(isEdit ? "Edit Course" : "Add New Course")</h1>
+                <p class="text-muted small mb-0">Upload course thumbnail, assign instructor, and configure details</p>
+            </div>
+            <a href="/Admin/Dashboard#courses" class="btn btn-outline-secondary btn-sm">&larr; Back to Course List</a>
+        </header>
+
+        <div class="p-3 p-md-4">
+            <div id="adminToastContainer" class="admin-toast-container" aria-live="polite"></div>
+
+            <form id="courseForm" data-course-id="@(courseId?.ToString() ?? "")" novalidate>
+                <input type="hidden" id="courseImagePath" value="" />
+
+                <div class="user-table-card p-3 p-md-4 mb-3">
+                    <h2 class="h6 fw-bold mb-1">Course Cover &amp; Details</h2>
+                    <p class="text-muted small mb-3">Upload a cover image and enter course metadata.</p>
+
+                    <div class="d-flex flex-wrap align-items-center gap-3 p-3 bg-light rounded border mb-3">
+                        <img id="coursePhotoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='64' viewBox='0 0 96 64'%3E%3Crect width='96' height='64' rx='8' fill='%23e0e7ff'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-size='14' font-family='sans-serif' fill='%234338ca'%3ECourse%3C/text%3E%3C/svg%3E"
+                             alt="Course Cover" class="rounded object-fit-cover border" style="width:96px;height:64px;" />
+                        <div>
+                            <label for="coursePhotoFile" class="btn btn-outline-primary btn-sm mb-1">Upload Course Image</label>
+                            <input type="file" id="coursePhotoFile" class="d-none" accept=".jpg,.jpeg,.png,.webp" />
+                            <div class="small text-muted">Accepts JPG, PNG, or WEBP (max 5 MB).</div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="courseTitle" class="form-label small fw-semibold">Course Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="courseTitle" />
+                            <div class="invalid-feedback" id="courseTitleError"></div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="courseCategory" class="form-label small fw-semibold">Category <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="courseCategory" placeholder="e.g. Development" />
+                            <div class="invalid-feedback" id="courseCategoryError"></div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="courseDuration" class="form-label small fw-semibold">Duration (Hours) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="courseDuration" min="1" value="6" />
+                            <div class="invalid-feedback" id="courseDurationError"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="courseTeacher" class="form-label small fw-semibold">Assign Teacher</label>
+                            <select class="form-select" id="courseTeacher">
+                                <option value="">-- Assign Later --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="courseIsPublished" checked />
+                                <label class="form-check-label small fw-semibold" for="courseIsPublished">Published on Catalog</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label for="courseDescription" class="form-label small fw-semibold">Description <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="courseDescription" rows="4"></textarea>
+                            <div class="invalid-feedback" id="courseDescriptionError"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="/Admin/Dashboard#courses" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4">@(isEdit ? "Update Course" : "Create Course")</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin-course-form.js" asp-append-version="true"></script>
+}

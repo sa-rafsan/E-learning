@@ -40,9 +40,13 @@ $(function () {
             return;
         }
 
-        const rows = courses.map(c => `
+        const rows = courses.map(c => {
+            const thumb = c.imagePath
+                ? `<img src="${escapeHtml(c.imagePath)}" alt="${escapeHtml(c.title)}" class="rounded object-fit-cover border me-2" style="width:36px;height:28px;" />`
+                : "";
+            return `
             <tr>
-                <td class="fw-semibold">${escapeHtml(c.title)}</td>
+                <td class="fw-semibold">${thumb}${escapeHtml(c.title)}</td>
                 <td>${escapeHtml(c.category)}</td>
                 <td>${c.durationHours}h</td>
                 <td>${escapeHtml(c.teacherName || "TBA")}</td>
@@ -53,10 +57,12 @@ $(function () {
                     </span>
                 </td>
                 <td class="text-end text-nowrap">
+                    <a href="/Admin/CourseForm/${c.id}" class="btn btn-sm btn-outline-secondary">Edit</a>
                     <button type="button" class="btn btn-sm btn-outline-primary btn-assign-teacher" data-id="${c.id}">Assign Teacher</button>
                     <button type="button" class="btn btn-sm btn-outline-dark btn-assign-students" data-id="${c.id}">Assign Students</button>
                 </td>
-            </tr>`);
+            </tr>`;
+        });
 
         $tbody.html(rows.join(""));
     }
@@ -99,12 +105,7 @@ $(function () {
     }
 
     $("#openCreateCourseBtn").on("click", function () {
-        const $form = $("#createCourseForm");
-        $form[0].reset();
-        $form.find(".is-invalid").removeClass("is-invalid");
-        $form.find(".invalid-feedback").text("");
-        $("#createCourseFormError").addClass("d-none").text("");
-        loadOptions().always(() => createCourseModal.show());
+        window.location.href = "/Admin/CourseForm";
     });
 
     $("#createCourseForm").on("submit", function (e) {

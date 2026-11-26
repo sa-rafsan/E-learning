@@ -48,12 +48,29 @@ public sealed class AdminCoursesController(IAdminCourseService courseService) : 
         });
     }
 
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetCourse(int id, CancellationToken cancellationToken)
+    {
+        var result = await courseService.GetCourseByIdAsync(id, cancellationToken);
+        return ToActionResult(result);
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateCourse(
         [FromBody] CreateCourseDto dto,
         CancellationToken cancellationToken)
     {
         var result = await courseService.CreateCourseAsync(dto, cancellationToken);
+        return ToActionResult(result);
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateCourse(
+        int id,
+        [FromBody] CreateCourseDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await courseService.UpdateCourseAsync(id, dto, cancellationToken);
         return ToActionResult(result);
     }
 

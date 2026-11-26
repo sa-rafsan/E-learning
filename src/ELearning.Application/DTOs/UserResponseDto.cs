@@ -20,6 +20,8 @@ public sealed class UserResponseDto
 
     public string? Department { get; set; }
 
+    public string? ImagePath { get; set; }
+
     public DateTime CreatedAtUtc { get; set; }
 
     public DateTime? UpdatedAtUtc { get; set; }

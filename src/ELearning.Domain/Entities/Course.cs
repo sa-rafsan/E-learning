@@ -20,6 +20,8 @@ public class Course
 
     public int? TeacherId { get; set; }
 
+    public string? ImagePath { get; set; }
+
     public Teacher? Teacher { get; set; }
 
     public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();

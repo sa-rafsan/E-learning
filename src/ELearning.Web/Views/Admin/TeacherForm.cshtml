@@ -1,0 +1,150 @@
+@{
+    var teacherUserId = ViewData["TeacherUserId"] as int?;
+    var isEdit = teacherUserId.HasValue;
+    ViewData["Title"] = isEdit ? "Edit Teacher" : "Add New Teacher";
+    ViewData["HideChrome"] = true;
+}
+
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <div>
+            <div class="admin-sidebar-brand">
+                <span class="admin-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
+                </span>
+                <div>
+                    <div class="fw-bold lh-sm text-white">E-Learning</div>
+                    <div class="small text-secondary lh-sm" style="font-size: 0.75rem;">Academic Portal</div>
+                </div>
+            </div>
+            <div class="admin-nav-label">MAIN MENU</div>
+            <ul class="admin-nav-list">
+                <li class="admin-nav-item"><a href="/Admin/Dashboard" class="admin-nav-link text-decoration-none"><span>Dashboard</span></a></li>
+                <li class="admin-nav-item"><a href="/Admin/Dashboard#teachers" class="admin-nav-link active text-decoration-none"><span>Teachers</span></a></li>
+                <li class="admin-nav-item"><a href="/Admin/StudentForm" class="admin-nav-link text-decoration-none"><span>+ Add Student</span></a></li>
+                <li class="admin-nav-item"><a href="/Admin/CourseForm" class="admin-nav-link text-decoration-none"><span>+ Add Course</span></a></li>
+            </ul>
+        </div>
+        <div class="admin-sidebar-footer">
+            <div class="admin-user-pill">
+                <span class="admin-avatar">SA</span>
+                <div class="min-w-0 flex-grow-1">
+                    <div class="small fw-semibold text-white">System Admin</div>
+                    <div class="text-info" style="font-size: 0.72rem;">Admin Account</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="admin-main">
+        <header class="admin-topbar">
+            <div>
+                <h1 class="h4 fw-bold mb-0 text-dark">@(isEdit ? "Edit Teacher" : "Add New Teacher")</h1>
+                <p class="text-muted small mb-0">Manage faculty profile, photo, status, and credentials</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/Admin/Dashboard#teachers" class="btn btn-outline-secondary btn-sm">&larr; Back to Teacher List</a>
+            </div>
+        </header>
+
+        <div class="p-3 p-md-4">
+            <div id="adminToastContainer" class="admin-toast-container" aria-live="polite"></div>
+
+            <form id="teacherForm" data-user-id="@(teacherUserId?.ToString() ?? "")" novalidate>
+                <input type="hidden" id="teacherImagePath" value="" />
+
+                <div class="user-table-card p-3 p-md-4 mb-3">
+                    <h2 class="h6 fw-bold mb-1">Teacher Profile &amp; Photo</h2>
+                    <p class="text-muted small mb-3">Upload faculty photo, contact details, and status.</p>
+
+                    <div class="d-flex flex-wrap align-items-center gap-3 p-3 bg-light rounded border mb-3">
+                        <img id="teacherPhotoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%23f3e8ff'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-size='22' font-family='sans-serif' fill='%237e22ce'%3ET%3C/text%3E%3C/svg%3E"
+                             alt="Teacher Photo" class="rounded-circle object-fit-cover border" style="width:64px;height:64px;" />
+                        <div>
+                            <label for="teacherPhotoFile" class="btn btn-outline-primary btn-sm mb-1">Upload Profile Photo</label>
+                            <input type="file" id="teacherPhotoFile" class="d-none" accept=".jpg,.jpeg,.png,.webp" />
+                            <div class="small text-muted">Accepts JPG, PNG, or WEBP (max 5 MB).</div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="teacherFullName" class="form-label small fw-semibold">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="teacherFullName" />
+                            <div class="invalid-feedback" id="teacherFullNameError"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="teacherEmail" class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="teacherEmail" />
+                            <div class="invalid-feedback" id="teacherEmailError"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="teacherPhone" class="form-label small fw-semibold">Phone Number</label>
+                            <input type="text" class="form-control" id="teacherPhone" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Account Status</label>
+                            <input type="hidden" id="teacherStatus" value="1" />
+                            <div class="row g-2">
+                                <div class="col-6"><button type="button" class="status-pill-btn active-status" data-status-val="1">Active Teacher</button></div>
+                                <div class="col-6"><button type="button" class="status-pill-btn" data-status-val="2">Inactive</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (!isEdit)
+                {
+                    <div class="user-table-card p-3 p-md-4 mb-3">
+                        <h2 class="h6 fw-bold mb-1">Account Password</h2>
+                        <p class="text-muted small mb-3">Set the initial login password (minimum 8 characters).</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="teacherPassword" class="form-label small fw-semibold">Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="teacherPassword" />
+                                <div class="invalid-feedback" id="teacherPasswordError"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="teacherConfirmPassword" class="form-label small fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="teacherConfirmPassword" />
+                                <div class="invalid-feedback" id="teacherConfirmPasswordError"></div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-end gap-2 mb-4">
+                    <a href="/Admin/Dashboard#teachers" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4">@(isEdit ? "Update Teacher" : "Save Teacher Record")</button>
+                </div>
+            </form>
+
+            @if (isEdit)
+            {
+                <div class="user-table-card p-3 p-md-4">
+                    <h2 class="h6 fw-bold mb-1 text-danger">Reset Teacher Password</h2>
+                    <p class="text-muted small mb-3">Set a new password for this teacher account.</p>
+                    <form id="teacherResetPasswordForm" class="row g-3 align-items-end" novalidate>
+                        <div class="col-md-4">
+                            <label for="resetNewPassword" class="form-label small fw-semibold">New Password <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="resetNewPassword" />
+                            <div class="invalid-feedback" id="resetNewPasswordError"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="resetConfirmPassword" class="form-label small fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="resetConfirmPassword" />
+                            <div class="invalid-feedback" id="resetConfirmPasswordError"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-outline-danger w-100">Reset Password</button>
+                        </div>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin-teacher-form.js" asp-append-version="true"></script>
+}

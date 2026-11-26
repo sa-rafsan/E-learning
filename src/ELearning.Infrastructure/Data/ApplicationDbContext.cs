@@ -37,6 +37,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(course => course.Description).HasMaxLength(2000).IsRequired();
             entity.Property(course => course.Instructor).HasMaxLength(120).IsRequired();
             entity.Property(course => course.Category).HasMaxLength(80).IsRequired();
+            entity.Property(course => course.ImagePath).HasMaxLength(500);
             entity.HasMany(course => course.Lessons)
                 .WithOne(lesson => lesson.Course)
                 .HasForeignKey(lesson => lesson.CourseId)
@@ -122,6 +123,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(teacher => teacher.PhoneNumber).HasMaxLength(30);
             entity.Property(teacher => teacher.Department).HasMaxLength(120);
             entity.Property(teacher => teacher.Designation).HasMaxLength(120);
+            entity.Property(teacher => teacher.ImagePath).HasMaxLength(500);
             entity.HasIndex(teacher => teacher.UserId).IsUnique();
             entity.HasIndex(teacher => teacher.Email).IsUnique();
         });
@@ -135,6 +137,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(student => student.Batch).HasMaxLength(32);
             entity.Property(student => student.Section).HasMaxLength(16);
             entity.Property(student => student.Department).HasMaxLength(120);
+            entity.Property(student => student.ImagePath).HasMaxLength(500);
             entity.HasIndex(student => student.UserId).IsUnique();
             entity.HasIndex(student => student.StudentId).IsUnique();
             entity.HasIndex(student => student.Email).IsUnique();

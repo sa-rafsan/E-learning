@@ -20,6 +20,8 @@ public class Student
 
     public string? Department { get; set; }
 
+    public string? ImagePath { get; set; }
+
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAtUtc { get; set; }

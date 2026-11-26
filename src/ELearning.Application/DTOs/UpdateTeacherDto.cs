@@ -11,5 +11,7 @@ public sealed class UpdateTeacherDto
     public string? PhoneNumber { get; set; }
 
     public UserStatus Status { get; set; } = UserStatus.Active;
+
+    public string? ImagePath { get; set; }
 }
 

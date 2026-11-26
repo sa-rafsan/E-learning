@@ -34,6 +34,13 @@ public sealed class AccountController(IAuthService authService) : Controller
         return View();
     }
 
+    [Authorize]
+    [HttpGet]
+    public IActionResult Profile()
+    {
+        return View();
+    }
+
     [AllowAnonymous]
     [HttpGet]
     public IActionResult AccessDenied()

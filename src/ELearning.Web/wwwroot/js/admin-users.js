@@ -237,9 +237,14 @@ $(function () {
         $(".status-pill-btn").removeClass("active-status inactive-status");
         $(".status-pill-btn[data-status-val='1']").addClass("active-status");
     });
-    $("#sidebarAddTeacherBtn").on("click", () => $("#openCreateTeacherBtn").trigger("click"));
-    $("#sidebarAddStudentBtn, #openCreateStudentBtn").on("click", showAddStudentSection);
-    $("#sidebarAddCourseBtn").on("click", () => $("#openCreateCourseBtn").trigger("click"));
+    $("#sidebarAddTeacherBtn, #openCreateTeacherBtn").on("click", () => { window.location.href = "/Admin/TeacherForm"; });
+    $("#sidebarAddStudentBtn, #openCreateStudentBtn").on("click", () => { window.location.href = "/Admin/StudentForm"; });
+    $("#sidebarAddCourseBtn").on("click", () => { window.location.href = "/Admin/CourseForm"; });
+
+    const initialHash = (window.location.hash || "").replace("#", "");
+    if (["teachers", "students", "courses"].includes(initialHash)) {
+        $(`.admin-nav-link[data-section='${initialHash}']`).trigger("click");
+    }
 
     let currentPage = 1;
     const avatarColors = [
@@ -321,11 +326,15 @@ $(function () {
             const nextStatus = u.status === "Active" ? 2 : 1;
             const toggleTitle = u.status === "Active" ? "Deactivate" : "Activate";
 
+            const avatarHtml = u.imagePath
+                ? `<img src="${escapeHtml(u.imagePath)}" alt="${escapeHtml(u.fullName)}" class="rounded-circle object-fit-cover border" style="width:38px;height:38px;flex-shrink:0;" />`
+                : `<span class="dir-avatar" style="background-color:${palette.bg};color:${palette.fg};">${escapeHtml(getInitials(u.fullName))}</span>`;
+
             return `
                 <tr>
                     <td>
                         <div class="d-flex align-items-center gap-3">
-                            <span class="dir-avatar" style="background-color:${palette.bg};color:${palette.fg};">${escapeHtml(getInitials(u.fullName))}</span>
+                            ${avatarHtml}
                             <div>
                                 <div class="fw-semibold text-dark">${escapeHtml(u.fullName)}</div>
                                 <div class="small text-muted">Faculty</div>
@@ -417,11 +426,15 @@ $(function () {
             const nextStatus = u.status === "Active" ? 2 : 1;
             const toggleTitle = u.status === "Active" ? "Deactivate" : "Activate";
 
+            const avatarHtml = u.imagePath
+                ? `<img src="${escapeHtml(u.imagePath)}" alt="${escapeHtml(u.fullName)}" class="rounded-circle object-fit-cover border" style="width:38px;height:38px;flex-shrink:0;" />`
+                : `<span class="dir-avatar" style="background-color:${palette.bg};color:${palette.fg};">${escapeHtml(getInitials(u.fullName))}</span>`;
+
             return `
                 <tr>
                     <td>
                         <div class="d-flex align-items-center gap-3">
-                            <span class="dir-avatar" style="background-color:${palette.bg};color:${palette.fg};">${escapeHtml(getInitials(u.fullName))}</span>
+                            ${avatarHtml}
                             <div>
                                 <div class="fw-semibold text-dark">${escapeHtml(u.fullName)}</div>
                                 <div class="small text-muted">${escapeHtml(subId)}</div>
@@ -620,30 +633,16 @@ $(function () {
             .fail(() => showAlert("Unable to load user details.", "danger"));
     });
 
-    // Open Edit User
+    // Open Edit User on dedicated Add/Edit page
     $(document).on("click", ".btn-edit-user", function () {
         const id = $(this).data("id");
         const user = allUsersCache.find(u => u.id === id);
         if (!user) return;
 
         if (user.role === "Teacher") {
-            clearFormValidation($("#editTeacherForm"));
-            $("#editTeacherId").val(user.id);
-            $("#editTeacherFullName").val(user.fullName);
-            $("#editTeacherEmail").val(user.email);
-            $("#editTeacherPhone").val(user.phoneNumber || "");
-            $("#editTeacherStatus").val(user.status === "Active" ? "1" : "2");
-            editTeacherModal.show();
+            window.location.href = `/Admin/TeacherForm/${id}`;
         } else if (user.role === "Student") {
-            clearFormValidation($("#editStudentForm"));
-            $("#editStudentId").val(user.id);
-            $("#editStudentFullName").val(user.fullName);
-            $("#editStudentEmail").val(user.email);
-            $("#editStudentCode").val(user.studentId || "");
-            $("#editStudentDepartment").val(user.department || "");
-            $("#editStudentPhone").val(user.phoneNumber || "");
-            $("#editStudentStatus").val(user.status === "Active" ? "1" : "2");
-            editStudentModal.show();
+            window.location.href = `/Admin/StudentForm/${id}`;
         }
     });
 

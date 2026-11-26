@@ -18,6 +18,8 @@ public sealed class AdminCourseDto
 
     public string TeacherName { get; set; } = string.Empty;
 
+    public string? ImagePath { get; set; }
+
     public int EnrolledStudentsCount { get; set; }
 
     public IReadOnlyList<int> EnrolledStudentIds { get; set; } = [];

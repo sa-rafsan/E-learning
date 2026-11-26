@@ -127,6 +127,10 @@ namespace ELearning.Infrastructure.Migrations
                     b.Property<int>("DurationHours")
                         .HasColumnType("int");
 
+                    b.Property<string>("ImagePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Instructor")
                         .IsRequired()
                         .HasMaxLength(120)
@@ -307,6 +311,10 @@ namespace ELearning.Infrastructure.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
 
+                    b.Property<string>("ImagePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
@@ -368,6 +376,10 @@ namespace ELearning.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("ImagePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(30)

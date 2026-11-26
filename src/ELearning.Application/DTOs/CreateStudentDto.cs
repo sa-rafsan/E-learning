@@ -19,5 +19,7 @@ public sealed class CreateStudentDto
     public string ConfirmPassword { get; set; } = string.Empty;
 
     public UserStatus Status { get; set; } = UserStatus.Active;
+
+    public string? ImagePath { get; set; }
 }
 

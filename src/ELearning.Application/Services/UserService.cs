@@ -42,6 +42,7 @@ public sealed class UserService(
             PhoneNumber = NormalizeOptional(dto.PhoneNumber),
             Role = UserRole.Teacher,
             Status = dto.Status,
+            ImagePath = NormalizeOptional(dto.ImagePath),
             CreatedAtUtc = DateTime.UtcNow
         };
 
@@ -87,6 +88,7 @@ public sealed class UserService(
             Department = NormalizeOptional(dto.Department),
             Role = UserRole.Student,
             Status = dto.Status,
+            ImagePath = NormalizeOptional(dto.ImagePath),
             CreatedAtUtc = DateTime.UtcNow
         };
 
@@ -172,6 +174,10 @@ public sealed class UserService(
         teacher.Email = normalizedEmail;
         teacher.PhoneNumber = NormalizeOptional(dto.PhoneNumber);
         teacher.Status = dto.Status;
+        if (!string.IsNullOrWhiteSpace(dto.ImagePath))
+        {
+            teacher.ImagePath = dto.ImagePath.Trim();
+        }
         teacher.UpdatedAtUtc = DateTime.UtcNow;
 
         var (succeeded, updatedUser, errorMessage) = await userRepository.UpdateUserAsync(teacher, cancellationToken);
@@ -226,6 +232,10 @@ public sealed class UserService(
         student.StudentId = normalizedStudentId;
         student.Department = NormalizeOptional(dto.Department);
         student.Status = dto.Status;
+        if (!string.IsNullOrWhiteSpace(dto.ImagePath))
+        {
+            student.ImagePath = dto.ImagePath.Trim();
+        }
         student.UpdatedAtUtc = DateTime.UtcNow;
 
         var (succeeded, updatedUser, errorMessage) = await userRepository.UpdateUserAsync(student, cancellationToken);
@@ -342,6 +352,7 @@ public sealed class UserService(
         Status = user.Status.ToString(),
         StudentId = user.StudentId,
         Department = user.Department,
+        ImagePath = user.ImagePath,
         CreatedAtUtc = user.CreatedAtUtc,
         UpdatedAtUtc = user.UpdatedAtUtc
     };

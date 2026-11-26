@@ -8,7 +8,16 @@ public interface IAdminCourseService
 {
     Task<ServiceResult<IReadOnlyList<AdminCourseDto>>> GetCoursesAsync(CancellationToken cancellationToken = default);
 
+    Task<ServiceResult<AdminCourseDto>> GetCourseByIdAsync(
+        int courseId,
+        CancellationToken cancellationToken = default);
+
     Task<ServiceResult<AdminCourseDto>> CreateCourseAsync(
+        CreateCourseDto dto,
+        CancellationToken cancellationToken = default);
+
+    Task<ServiceResult<AdminCourseDto>> UpdateCourseAsync(
+        int courseId,
         CreateCourseDto dto,
         CancellationToken cancellationToken = default);
 
