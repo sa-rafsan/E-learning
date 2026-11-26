@@ -1,0 +1,22 @@
+@model CourseSummaryDto
+<article class="course-card">
+    <a class="course-card-link" asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Id">
+        <div class="course-cover">
+            <span class="course-cover-label">@Model.Category</span>
+            <span class="course-cover-title">@Model.Title</span>
+            <span class="course-cover-mark" aria-hidden="true">E</span>
+        </div>
+        <div class="course-card-body">
+            <div class="course-card-meta">
+                <span>@Model.LessonCount lessons</span>
+                <span>@Model.DurationHours hours</span>
+            </div>
+            <h3>@Model.Title</h3>
+            <p class="course-card-description">@Model.Description</p>
+            <div class="course-card-footer">
+                <span>With @Model.Instructor</span>
+                <span class="card-arrow" aria-hidden="true">&rarr;</span>
+            </div>
+        </div>
+    </a>
+</article>

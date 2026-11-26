@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f5f0" />
+    <title>@ViewData["Title"] | E-learning</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ELearning.Web.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="site-header">
+        <nav class="site-nav container" aria-label="Main navigation">
+            <a class="brand" asp-controller="Home" asp-action="Index" aria-label="E-learning home">
+                <span class="brand-mark">e</span>
+                <span>learning<span class="brand-period">.</span></span>
+            </a>
+            <div class="nav-links">
+                <a asp-controller="Courses" asp-action="Index">Explore courses</a>
+                <a class="nav-cta" asp-controller="Courses" asp-action="Index">Start learning <span aria-hidden="true">&rarr;</span></a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        @RenderBody()
+    </main>
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <a class="brand footer-brand" asp-controller="Home" asp-action="Index">
+                <span class="brand-mark">e</span>
+                <span>learning<span class="brand-period">.</span></span>
+            </a>
+            <p>Make room for what’s next.</p>
+            <span>&copy; @DateTime.UtcNow.Year E-learning</span>
+        </div>
+    </footer>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
