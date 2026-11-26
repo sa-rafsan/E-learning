@@ -81,6 +81,15 @@ $(function () {
         $(".auth-role-btn").removeClass("active");
         $(this).addClass("active");
         $("#loginRole").val(role).trigger("change");
+
+        $.get("/api/auth/demo-credentials", { role })
+            .done(function (creds) {
+                if (creds && creds.email && creds.password) {
+                    $("#loginEmail").val(creds.email).trigger("input");
+                    $("#loginPassword").val(creds.password).trigger("input");
+                    $("#loginErrorAlert").addClass("d-none").text("");
+                }
+            });
     });
 
     $("#togglePasswordBtn").on("click", function () {

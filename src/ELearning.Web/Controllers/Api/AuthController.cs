@@ -2,17 +2,52 @@ using System.Security.Claims;
 using ELearning.Application.Common;
 using ELearning.Application.DTOs;
 using ELearning.Application.Interfaces.Services;
+using ELearning.Application.Options;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace ELearning.Web.Controllers.Api;
 
 [ApiController]
 [Route("api/auth")]
-public sealed class AuthController(IAuthService authService) : ControllerBase
+public sealed class AuthController(
+    IAuthService authService,
+    IWebHostEnvironment environment,
+    IOptions<AdminSettings> adminOptions) : ControllerBase
 {
     private const string AccessTokenCookieName = "ELearning.AccessToken";
     private const string RefreshTokenCookieName = "ELearning.RefreshToken";
+
+    [AllowAnonymous]
+    [HttpGet("demo-credentials")]
+    public IActionResult GetDemoCredentials([FromQuery] string role)
+    {
+        if (!environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        return role?.Trim().ToLowerInvariant() switch
+        {
+            "admin" => Ok(new
+            {
+                email = adminOptions.Value.Email,
+                password = adminOptions.Value.Password
+            }),
+            "teacher" => Ok(new
+            {
+                email = "ayesha.rahman@wub.edu.bd",
+                password = "Teacher@123"
+            }),
+            "student" => Ok(new
+            {
+                email = "0325704650@student.wub.edu.bd",
+                password = "0325704650"
+            }),
+            _ => BadRequest(new { message = "Invalid role." })
+        };
+    }
 
     [AllowAnonymous]
     [HttpPost("login")]
