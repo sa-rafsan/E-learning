@@ -250,12 +250,12 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Course Title</th>
+                                <th>Code / Weeks</th>
                                 <th>Category</th>
-                                <th>Duration</th>
+                                <th>Batches</th>
                                 <th>Assigned Teacher</th>
-                                <th>Enrolled Students</th>
-                                <th>Status</th>
-                                <th class="text-end">Assignments</th>
+                                <th>Enrolled</th>
+                                <th class="text-end">Actions &amp; Batches</th>
                             </tr>
                         </thead>
                         <tbody id="coursesTableBody">
@@ -759,6 +759,35 @@
                     <button type="submit" class="btn btn-primary">Create Course</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Manage Batches Modal -->
+<div class="modal fade" id="manageBatchesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5 fw-bold">Course Batches &amp; Multi-Teacher Assignment</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-2">Course: <strong id="batchModalCourseTitle"></strong></p>
+                <form id="createBatchForm" class="row g-2 p-3 bg-light rounded border mb-3">
+                    <input type="hidden" id="batchCourseId" />
+                    <div class="col-md-4"><label class="small fw-semibold">Batch Name *</label><input type="text" class="form-control form-control-sm" id="batchNameInput" placeholder="e.g. Batch 01" required /></div>
+                    <div class="col-md-3"><label class="small fw-semibold">Batch Code *</label><input type="text" class="form-control form-control-sm" id="batchCodeInput" placeholder="e.g. B01" required /></div>
+                    <div class="col-md-5"><label class="small fw-semibold">Schedule</label><input type="text" class="form-control form-control-sm" id="batchScheduleInput" placeholder="Sun/Tue 10:00 AM" /></div>
+                    <div class="col-md-3"><label class="small fw-semibold">Start Date *</label><input type="date" class="form-control form-control-sm" id="batchStartDate" required /></div>
+                    <div class="col-md-3"><label class="small fw-semibold">End Date *</label><input type="date" class="form-control form-control-sm" id="batchEndDate" required /></div>
+                    <div class="col-md-6">
+                        <label class="small fw-semibold">Assign Teacher(s)</label>
+                        <select id="batchTeacherIdsSelect" class="form-select form-select-sm" multiple size="2"></select>
+                    </div>
+                    <div class="col-12 text-end"><button type="submit" class="btn btn-primary btn-sm">+ Create Batch</button></div>
+                </form>
+                <div id="courseBatchesList"></div>
+            </div>
         </div>
     </div>
 </div>

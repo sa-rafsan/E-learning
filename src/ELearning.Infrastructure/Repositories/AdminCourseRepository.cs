@@ -14,6 +14,8 @@ public sealed class AdminCourseRepository(ApplicationDbContext dbContext) : IAdm
             .AsNoTracking()
             .Include(c => c.Teacher)
             .Include(c => c.Enrollments)
+            .Include(c => c.Batches)
+            .Include(c => c.Weeks)
             .OrderByDescending(c => c.Id)
             .ToListAsync(cancellationToken);
     }
@@ -25,6 +27,8 @@ public sealed class AdminCourseRepository(ApplicationDbContext dbContext) : IAdm
         return dbContext.Courses
             .Include(c => c.Teacher)
             .Include(c => c.Enrollments)
+            .Include(c => c.Batches)
+            .Include(c => c.Weeks)
             .SingleOrDefaultAsync(c => c.Id == courseId, cancellationToken);
     }
 

@@ -22,6 +22,119 @@ namespace ELearning.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ELearning.Domain.Entities.ActivityQuestion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CorrectOption")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal>("Marks")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<string>("OptionA")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("OptionB")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("OptionC")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("OptionD")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("QuestionText")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WeekActivityId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WeekActivityId");
+
+                    b.ToTable("ActivityQuestions");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.ActivitySubmission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AnswersJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AttachmentPath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("EvaluatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Feedback")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("IsAutoEvaluated")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsEvaluated")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("ObtainedMarks")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SubmissionText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SubmittedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("WeekActivityId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("WeekActivityId", "StudentId")
+                        .IsUnique();
+
+                    b.ToTable("ActivitySubmissions");
+                });
+
             modelBuilder.Entity("ELearning.Domain.Entities.AttendanceRecord", b =>
                 {
                     b.Property<int>("Id")
@@ -103,6 +216,33 @@ namespace ELearning.Infrastructure.Migrations
                     b.ToTable("AttendanceSessions");
                 });
 
+            modelBuilder.Entity("ELearning.Domain.Entities.BatchTeacher", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssignedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CourseBatchId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeacherId");
+
+                    b.HasIndex("CourseBatchId", "TeacherId")
+                        .IsUnique();
+
+                    b.ToTable("BatchTeachers");
+                });
+
             modelBuilder.Entity("ELearning.Domain.Entities.Course", b =>
                 {
                     b.Property<int>("Id")
@@ -116,6 +256,11 @@ namespace ELearning.Infrastructure.Migrations
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
 
+                    b.Property<string>("CourseCode")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
@@ -126,6 +271,11 @@ namespace ELearning.Infrastructure.Migrations
 
                     b.Property<int>("DurationHours")
                         .HasColumnType("int");
+
+                    b.Property<int>("DurationWeeks")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(12);
 
                     b.Property<string>("ImagePath")
                         .HasMaxLength(500)
@@ -138,6 +288,9 @@ namespace ELearning.Infrastructure.Migrations
 
                     b.Property<bool>("IsPublished")
                         .HasColumnType("bit");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<int?>("TeacherId")
                         .HasColumnType("int");
@@ -154,6 +307,51 @@ namespace ELearning.Infrastructure.Migrations
                     b.ToTable("Courses");
                 });
 
+            modelBuilder.Entity("ELearning.Domain.Entities.CourseBatch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BatchCode")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("BatchName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Schedule")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId", "BatchCode")
+                        .IsUnique();
+
+                    b.ToTable("CourseBatches");
+                });
+
             modelBuilder.Entity("ELearning.Domain.Entities.CourseEnrollment", b =>
                 {
                     b.Property<int>("Id")
@@ -161,6 +359,9 @@ namespace ELearning.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CourseBatchId")
+                        .HasColumnType("int");
 
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
@@ -173,12 +374,104 @@ namespace ELearning.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CourseBatchId");
+
                     b.HasIndex("StudentId");
 
                     b.HasIndex("CourseId", "StudentId")
                         .IsUnique();
 
                     b.ToTable("CourseEnrollments");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.CourseWeek", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AssignedTeacherId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("LearningObjectives")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateOnly?>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("WeekNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedTeacherId");
+
+                    b.HasIndex("CourseId", "WeekNumber")
+                        .IsUnique();
+
+                    b.ToTable("CourseWeeks");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.ForumPost", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("AuthorRole")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ParentPostId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WeekActivityId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentPostId");
+
+                    b.HasIndex("WeekActivityId");
+
+                    b.ToTable("ForumPosts");
                 });
 
             modelBuilder.Entity("ELearning.Domain.Entities.Lesson", b =>
@@ -290,16 +583,28 @@ namespace ELearning.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Batch")
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 
+                    b.Property<string>("Country")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date");
 
                     b.Property<string>("Department")
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("EducationalBackground")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -311,9 +616,15 @@ namespace ELearning.Infrastructure.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
 
+                    b.Property<string>("Gender")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ImagePath")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Nationality")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(30)
@@ -356,6 +667,12 @@ namespace ELearning.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
@@ -381,9 +698,21 @@ namespace ELearning.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("Nationality")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("ProfessionalExperience")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShortBiography")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Specialization")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("datetime2");
@@ -400,6 +729,183 @@ namespace ELearning.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Teachers");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.TeacherQualification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DegreeName")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.Property<string>("InstitutionName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("PassingYear")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("TeacherQualifications");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.WeekActivity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AllowLateSubmission")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("AttachmentPath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("CourseBatchId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CourseWeekId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EndAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Instructions")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<decimal>("MaxMarks")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<decimal?>("PassingMarks")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<string>("RequiredTasks")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("StartAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("SubmissionDeadlineUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TimeLimitMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseBatchId");
+
+                    b.HasIndex("CourseWeekId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("WeekActivities");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.WeekMaterial", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseWeekId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ExternalUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("FilePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("MaterialType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("UploadedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseWeekId");
+
+                    b.ToTable("WeekMaterials");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.WeekTopic", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseWeekId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseWeekId");
+
+                    b.ToTable("WeekTopics");
                 });
 
             modelBuilder.Entity("ELearning.Infrastructure.Identity.ApplicationUser", b =>
@@ -634,6 +1140,36 @@ namespace ELearning.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ELearning.Domain.Entities.ActivityQuestion", b =>
+                {
+                    b.HasOne("ELearning.Domain.Entities.WeekActivity", "Activity")
+                        .WithMany("Questions")
+                        .HasForeignKey("WeekActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.ActivitySubmission", b =>
+                {
+                    b.HasOne("ELearning.Domain.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("ELearning.Domain.Entities.WeekActivity", "Activity")
+                        .WithMany("Submissions")
+                        .HasForeignKey("WeekActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("ELearning.Domain.Entities.AttendanceRecord", b =>
                 {
                     b.HasOne("ELearning.Domain.Entities.AttendanceSession", "Session")
@@ -672,6 +1208,25 @@ namespace ELearning.Infrastructure.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("ELearning.Domain.Entities.BatchTeacher", b =>
+                {
+                    b.HasOne("ELearning.Domain.Entities.CourseBatch", "Batch")
+                        .WithMany("BatchTeachers")
+                        .HasForeignKey("CourseBatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ELearning.Domain.Entities.Teacher", "Teacher")
+                        .WithMany("BatchAssignments")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Batch");
+
+                    b.Navigation("Teacher");
+                });
+
             modelBuilder.Entity("ELearning.Domain.Entities.Course", b =>
                 {
                     b.HasOne("ELearning.Domain.Entities.Teacher", "Teacher")
@@ -682,8 +1237,24 @@ namespace ELearning.Infrastructure.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("ELearning.Domain.Entities.CourseBatch", b =>
+                {
+                    b.HasOne("ELearning.Domain.Entities.Course", "Course")
+                        .WithMany("Batches")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("ELearning.Domain.Entities.CourseEnrollment", b =>
                 {
+                    b.HasOne("ELearning.Domain.Entities.CourseBatch", "Batch")
+                        .WithMany("Enrollments")
+                        .HasForeignKey("CourseBatchId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("ELearning.Domain.Entities.Course", "Course")
                         .WithMany("Enrollments")
                         .HasForeignKey("CourseId")
@@ -691,14 +1262,52 @@ namespace ELearning.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("ELearning.Domain.Entities.Student", "Student")
-                        .WithMany()
+                        .WithMany("Enrollments")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Batch");
 
                     b.Navigation("Course");
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.CourseWeek", b =>
+                {
+                    b.HasOne("ELearning.Domain.Entities.Teacher", "AssignedTeacher")
+                        .WithMany()
+                        .HasForeignKey("AssignedTeacherId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("ELearning.Domain.Entities.Course", "Course")
+                        .WithMany("Weeks")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AssignedTeacher");
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.ForumPost", b =>
+                {
+                    b.HasOne("ELearning.Domain.Entities.ForumPost", "ParentPost")
+                        .WithMany()
+                        .HasForeignKey("ParentPostId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("ELearning.Domain.Entities.WeekActivity", "Activity")
+                        .WithMany("ForumPosts")
+                        .HasForeignKey("WeekActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("ParentPost");
                 });
 
             modelBuilder.Entity("ELearning.Domain.Entities.Lesson", b =>
@@ -756,6 +1365,65 @@ namespace ELearning.Infrastructure.Migrations
                         .HasForeignKey("ELearning.Domain.Entities.Teacher", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.TeacherQualification", b =>
+                {
+                    b.HasOne("ELearning.Domain.Entities.Teacher", "Teacher")
+                        .WithMany("Qualifications")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.WeekActivity", b =>
+                {
+                    b.HasOne("ELearning.Domain.Entities.CourseBatch", "Batch")
+                        .WithMany()
+                        .HasForeignKey("CourseBatchId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("ELearning.Domain.Entities.CourseWeek", "Week")
+                        .WithMany("Activities")
+                        .HasForeignKey("CourseWeekId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ELearning.Domain.Entities.Teacher", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Batch");
+
+                    b.Navigation("Teacher");
+
+                    b.Navigation("Week");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.WeekMaterial", b =>
+                {
+                    b.HasOne("ELearning.Domain.Entities.CourseWeek", "Week")
+                        .WithMany("Materials")
+                        .HasForeignKey("CourseWeekId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Week");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.WeekTopic", b =>
+                {
+                    b.HasOne("ELearning.Domain.Entities.CourseWeek", "Week")
+                        .WithMany("Topics")
+                        .HasForeignKey("CourseWeekId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Week");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -816,9 +1484,50 @@ namespace ELearning.Infrastructure.Migrations
 
             modelBuilder.Entity("ELearning.Domain.Entities.Course", b =>
                 {
+                    b.Navigation("Batches");
+
                     b.Navigation("Enrollments");
 
                     b.Navigation("Lessons");
+
+                    b.Navigation("Weeks");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.CourseBatch", b =>
+                {
+                    b.Navigation("BatchTeachers");
+
+                    b.Navigation("Enrollments");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.CourseWeek", b =>
+                {
+                    b.Navigation("Activities");
+
+                    b.Navigation("Materials");
+
+                    b.Navigation("Topics");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.Student", b =>
+                {
+                    b.Navigation("Enrollments");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.Teacher", b =>
+                {
+                    b.Navigation("BatchAssignments");
+
+                    b.Navigation("Qualifications");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.WeekActivity", b =>
+                {
+                    b.Navigation("ForumPosts");
+
+                    b.Navigation("Questions");
+
+                    b.Navigation("Submissions");
                 });
 
             modelBuilder.Entity("ELearning.Infrastructure.Identity.ApplicationUser", b =>

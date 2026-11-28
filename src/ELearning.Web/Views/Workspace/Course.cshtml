@@ -1,0 +1,218 @@
+@using ELearning.Domain.Enums
+@{
+    var courseId = ViewData["CourseId"] as int? ?? 0;
+    ViewData["Title"] = "Course Workspace";
+    ViewData["HideChrome"] = true;
+    var isAdmin = User.IsInRole(nameof(UserRole.Admin));
+    var isTeacher = User.IsInRole(nameof(UserRole.Teacher));
+    var isStudent = User.IsInRole(nameof(UserRole.Student));
+    var canManage = isAdmin || isTeacher;
+    var dashboardUrl = isAdmin ? "/Admin/Dashboard" : isTeacher ? "/Teacher/Dashboard" : "/Student/Dashboard";
+}
+
+<div class="admin-shell" id="workspaceRoot" data-course-id="@courseId" data-can-manage="@canManage.ToString().ToLowerInvariant()" data-is-student="@isStudent.ToString().ToLowerInvariant()">
+    <aside class="admin-sidebar">
+        <div>
+            <div class="admin-sidebar-brand">
+                <span class="admin-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
+                </span>
+                <div>
+                    <div class="fw-bold lh-sm text-white">E-Learning</div>
+                    <div class="small text-secondary lh-sm" style="font-size: 0.75rem;">Course Workspace</div>
+                </div>
+            </div>
+            <div class="admin-nav-label">COURSE MENU</div>
+            <ul class="admin-nav-list">
+                <li class="admin-nav-item"><button type="button" class="admin-nav-link active" data-ws-tab="general"><span>General Section</span></button></li>
+                <li class="admin-nav-item"><button type="button" class="admin-nav-link" data-ws-tab="weeks"><span>Weekly Curriculum</span></button></li>
+                <li class="admin-nav-item"><a href="@dashboardUrl" class="admin-nav-link text-decoration-none"><span>&larr; Back to Dashboard</span></a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <div class="admin-main">
+        <header class="admin-topbar">
+            <div>
+                <h1 class="h4 fw-bold mb-0 text-dark" id="wsCourseTitle">Loading Course...</h1>
+                <p class="text-muted small mb-0" id="wsCourseSubtitle"></p>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-primary btn-sm" data-ws-tab="general">General</button>
+                <button type="button" class="btn btn-primary btn-sm" data-ws-tab="weeks">Weekly Content &amp; Activities</button>
+            </div>
+        </header>
+
+        <div class="p-3 p-md-4">
+            <div id="adminToastContainer" class="admin-toast-container" aria-live="polite"></div>
+
+            <!-- General Section -->
+            <div id="wsGeneralTab">
+                <div class="row g-3 mb-4" id="wsGeneralCourseCard"></div>
+                <h2 class="h5 fw-bold mb-3">Assigned Teachers</h2>
+                <div class="row g-3 mb-4" id="wsGeneralTeachers"></div>
+                <h2 class="h5 fw-bold mb-3">Batches &amp; Enrolled Students</h2>
+                <div class="row g-3" id="wsGeneralBatches"></div>
+            </div>
+
+            <!-- Weekly Curriculum Section -->
+            <div id="wsWeeksTab" class="d-none">
+                <div id="wsWeeksContainer" class="d-flex flex-column gap-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (canManage)
+{
+    <!-- Edit Week Modal -->
+    <div class="modal fade" id="editWeekModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="editWeekForm">
+                    <input type="hidden" id="editWeekId" />
+                    <div class="modal-header"><h2 class="modal-title h5 fw-bold">Edit Week Details</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                        <div class="mb-2"><label class="form-label small fw-semibold">Week Title *</label><input type="text" class="form-control" id="editWeekTitle" required /></div>
+                        <div class="mb-2"><label class="form-label small fw-semibold">Description</label><textarea class="form-control" id="editWeekDesc" rows="2"></textarea></div>
+                        <div class="mb-2"><label class="form-label small fw-semibold">Learning Objectives</label><textarea class="form-control" id="editWeekObj" rows="2"></textarea></div>
+                        <div class="row g-2">
+                            <div class="col-6"><label class="form-label small fw-semibold">Start Date</label><input type="date" class="form-control" id="editWeekStart" /></div>
+                            <div class="col-6"><label class="form-label small fw-semibold">End Date</label><input type="date" class="form-control" id="editWeekEnd" /></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer"><button type="submit" class="btn btn-primary">Save Week</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Topic Modal -->
+    <div class="modal fade" id="addTopicModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="addTopicForm">
+                    <input type="hidden" id="topicWeekId" />
+                    <div class="modal-header"><h2 class="modal-title h5 fw-bold">Add Week Topic</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                        <div class="mb-2"><label class="form-label small fw-semibold">Topic Title *</label><input type="text" class="form-control" id="topicTitle" required /></div>
+                        <div class="mb-2"><label class="form-label small fw-semibold">Description</label><textarea class="form-control" id="topicDesc" rows="2"></textarea></div>
+                        <div class="mb-2"><label class="form-label small fw-semibold">Order</label><input type="number" class="form-control" id="topicOrder" value="1" min="1" /></div>
+                    </div>
+                    <div class="modal-footer"><button type="submit" class="btn btn-primary">Add Topic</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Material Modal -->
+    <div class="modal fade" id="addMaterialModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="addMaterialForm">
+                    <input type="hidden" id="matWeekId" />
+                    <input type="hidden" id="matFilePath" />
+                    <div class="modal-header"><h2 class="modal-title h5 fw-bold">Add Learning Material</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                        <div class="mb-2"><label class="form-label small fw-semibold">Title *</label><input type="text" class="form-control" id="matTitle" required /></div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold">Type</label>
+                            <select class="form-select" id="matType"><option value="File">File</option><option value="Link">External Link</option><option value="Note">Note</option></select>
+                        </div>
+                        <div class="mb-2"><label class="form-label small fw-semibold">Upload File (Optional)</label><input type="file" class="form-control form-control-sm" id="matFileInput" /></div>
+                        <div class="mb-2"><label class="form-label small fw-semibold">External URL (Optional)</label><input type="url" class="form-control" id="matUrl" placeholder="https://..." /></div>
+                    </div>
+                    <div class="modal-footer"><button type="submit" class="btn btn-primary">Save Material</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Activity Modal -->
+    <div class="modal fade" id="createActivityModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="createActivityForm">
+                    <input type="hidden" id="actWeekId" />
+                    <input type="hidden" id="actAttachmentPath" />
+                    <div class="modal-header"><h2 class="modal-title h5 fw-bold">Create Weekly Activity / Assessment</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Activity Type *</label>
+                                <select class="form-select" id="actType">
+                                    <option value="1">Assignment</option>
+                                    <option value="2">Lab Report</option>
+                                    <option value="3">Quiz</option>
+                                    <option value="4">Forum</option>
+                                    <option value="5">Online Examination</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Batch (Optional)</label>
+                                <select class="form-select" id="actBatchId"><option value="">All Batches</option></select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Status</label>
+                                <select class="form-select" id="actStatus">
+                                    <option value="3">Published</option>
+                                    <option value="2">Scheduled</option>
+                                    <option value="4">Active</option>
+                                    <option value="1">Draft</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-2"><label class="form-label small fw-semibold">Title *</label><input type="text" class="form-control" id="actTitle" required /></div>
+                        <div class="mb-2"><label class="form-label small fw-semibold">Instructions / Discussion Topic</label><textarea class="form-control" id="actInstructions" rows="2"></textarea></div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-4"><label class="form-label small fw-semibold">Start Date &amp; Time *</label><input type="datetime-local" class="form-control" id="actStart" required /></div>
+                            <div class="col-md-4"><label class="form-label small fw-semibold">End / Deadline *</label><input type="datetime-local" class="form-control" id="actEnd" required /></div>
+                            <div class="col-md-2"><label class="form-label small fw-semibold">Max Marks</label><input type="number" class="form-control" id="actMaxMarks" value="100" /></div>
+                            <div class="col-md-2"><label class="form-label small fw-semibold">Time Limit (m)</label><input type="number" class="form-control" id="actTimeLimit" placeholder="30" /></div>
+                        </div>
+                        <div class="row g-2 mb-2 align-items-center">
+                            <div class="col-md-6"><label class="form-label small fw-semibold">Attachment (Optional)</label><input type="file" class="form-control form-control-sm" id="actFileInput" /></div>
+                            <div class="col-md-6 pt-3"><div class="form-check"><input class="form-check-input" type="checkbox" id="actAllowLate" /><label class="form-check-label small" for="actAllowLate">Allow Late Submission</label></div></div>
+                        </div>
+                        <div id="actQuestionsSection" class="border rounded p-2 mt-2 d-none">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-bold">Questions (MCQ / True-False / Short Answer)</span>
+                                <button type="button" id="addActQuestionBtn" class="btn btn-outline-primary btn-sm">+ Add Question</button>
+                            </div>
+                            <div id="actQuestionsContainer" class="d-flex flex-column gap-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer"><button type="submit" class="btn btn-primary">Create Activity</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submissions & Evaluation Modal -->
+    <div class="modal fade" id="submissionsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header"><h2 class="modal-title h5 fw-bold">Student Submissions &amp; Evaluation</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body" id="submissionsModalBody"></div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Activity Viewer / Student Submission / Quiz / Forum Modal -->
+<div class="modal fade" id="activityDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5 fw-bold" id="actDetailTitle">Activity</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="actDetailBody"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/course-workspace.js" asp-append-version="true"></script>
+}
+

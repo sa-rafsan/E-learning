@@ -62,3 +62,4 @@ public sealed class UploadsController(IWebHostEnvironment environment) : Control
         return Ok(new { imagePath = $"/uploads/{safeFolder}/{fileName}" });
     }
 }
+

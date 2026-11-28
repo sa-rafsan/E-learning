@@ -66,29 +66,46 @@
                     </div>
 
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="courseTitle" class="form-label small fw-semibold">Course Title <span class="text-danger">*</span></label>
+                        <div class="col-md-5">
+                            <label for="courseTitle" class="form-label small fw-semibold">Course Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="courseTitle" />
                             <div class="invalid-feedback" id="courseTitleError"></div>
                         </div>
                         <div class="col-md-3">
+                            <label for="courseCode" class="form-label small fw-semibold">Course Code <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="courseCode" placeholder="e.g. CS-101" />
+                            <div class="invalid-feedback" id="courseCodeError"></div>
+                        </div>
+                        <div class="col-md-4">
                             <label for="courseCategory" class="form-label small fw-semibold">Category <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="courseCategory" placeholder="e.g. Development" />
                             <div class="invalid-feedback" id="courseCategoryError"></div>
                         </div>
                         <div class="col-md-3">
-                            <label for="courseDuration" class="form-label small fw-semibold">Duration (Hours) <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="courseDuration" min="1" value="6" />
+                            <label for="courseDurationWeeks" class="form-label small fw-semibold">Duration (Weeks) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="courseDurationWeeks" min="1" max="52" value="12" />
+                            <div class="invalid-feedback" id="courseDurationWeeksError"></div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="courseDuration" class="form-label small fw-semibold">Total Hours <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="courseDuration" min="1" value="24" />
                             <div class="invalid-feedback" id="courseDurationError"></div>
                         </div>
-                        <div class="col-md-6">
-                            <label for="courseTeacher" class="form-label small fw-semibold">Assign Teacher</label>
+                        <div class="col-md-3">
+                            <label for="courseStatus" class="form-label small fw-semibold">Course Status</label>
+                            <select class="form-select" id="courseStatus">
+                                <option value="1">Active</option>
+                                <option value="2">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="courseTeacher" class="form-label small fw-semibold">Lead Teacher</label>
                             <select class="form-select" id="courseTeacher">
                                 <option value="">-- Assign Later --</option>
                             </select>
                         </div>
-                        <div class="col-md-6 d-flex align-items-end">
-                            <div class="form-check mb-2">
+                        <div class="col-12">
+                            <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="courseIsPublished" checked />
                                 <label class="form-check-label small fw-semibold" for="courseIsPublished">Published on Catalog</label>
                             </div>
@@ -113,3 +130,4 @@
 @section Scripts {
     <script src="~/js/admin-course-form.js" asp-append-version="true"></script>
 }
+
