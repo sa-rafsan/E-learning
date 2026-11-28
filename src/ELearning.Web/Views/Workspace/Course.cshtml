@@ -24,8 +24,7 @@
             </div>
             <div class="admin-nav-label">COURSE MENU</div>
             <ul class="admin-nav-list">
-                <li class="admin-nav-item"><button type="button" class="admin-nav-link active" data-ws-tab="general"><span>General Section</span></button></li>
-                <li class="admin-nav-item"><button type="button" class="admin-nav-link" data-ws-tab="weeks"><span>Weekly Curriculum</span></button></li>
+                <li class="admin-nav-item"><button type="button" class="admin-nav-link active" data-ws-tab="weeks"><span>Weekly Curriculum</span></button></li>
                 <li class="admin-nav-item"><a href="@dashboardUrl" class="admin-nav-link text-decoration-none"><span>&larr; Back to Dashboard</span></a></li>
             </ul>
         </div>
@@ -46,17 +45,25 @@
         <div class="p-3 p-md-4">
             <div id="adminToastContainer" class="admin-toast-container" aria-live="polite"></div>
 
-            <!-- General Section -->
-            <div id="wsGeneralTab">
-                <div class="row g-3 mb-4" id="wsGeneralCourseCard"></div>
-                <h2 class="h5 fw-bold mb-3">Assigned Teachers</h2>
-                <div class="row g-3 mb-4" id="wsGeneralTeachers"></div>
-                <h2 class="h5 fw-bold mb-3">Batches &amp; Enrolled Students</h2>
-                <div class="row g-3" id="wsGeneralBatches"></div>
+            <!-- Collapsible General Section above Week 1 -->
+            <div class="user-table-card mb-3 overflow-hidden" id="wsGeneralTab">
+                <button class="btn btn-light w-100 text-start d-flex justify-content-between align-items-center p-3 fw-bold border-0" type="button" data-bs-toggle="collapse" data-bs-target="#wsGeneralCollapse" aria-expanded="false" aria-controls="wsGeneralCollapse">
+                    <span>General Section (Course Overview, Teachers &amp; Batches)</span>
+                    <span class="small text-muted">Click to Open / Close &#9662;</span>
+                </button>
+                <div class="collapse" id="wsGeneralCollapse">
+                    <div class="p-3 p-md-4 border-top">
+                        <div class="row g-3 mb-4" id="wsGeneralCourseCard"></div>
+                        <h2 class="h5 fw-bold mb-3">Assigned Teachers</h2>
+                        <div class="row g-3 mb-4" id="wsGeneralTeachers"></div>
+                        <h2 class="h5 fw-bold mb-3">Batches &amp; Enrolled Students</h2>
+                        <div class="row g-3" id="wsGeneralBatches"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Weekly Curriculum Section -->
-            <div id="wsWeeksTab" class="d-none">
+            <div id="wsWeeksTab">
                 <div id="wsWeeksContainer" class="d-flex flex-column gap-3"></div>
             </div>
         </div>

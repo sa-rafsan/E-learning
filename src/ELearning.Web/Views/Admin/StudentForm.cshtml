@@ -59,13 +59,28 @@
                     <p class="text-muted small mb-3">Unique Student ID, Batch/Section, and account status.</p>
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label for="studentIdInput" class="form-label small fw-semibold">Student ID <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="studentIdInput" placeholder="e.g. 0325704750" />
-                            <div class="invalid-feedback" id="studentIdInputError"></div>
+                            <label for="studentDepartment" class="form-label small fw-semibold">Department</label>
+                            <select class="form-select" id="studentDepartment">
+                                <option value="">Select Department...</option>
+                            </select>
                         </div>
                         <div class="col-md-4">
-                            <label for="studentDepartment" class="form-label small fw-semibold">Department / Batch &amp; Section</label>
-                            <input type="text" class="form-control" id="studentDepartment" placeholder="e.g. Batch 70 - Section A" />
+                            <label for="studentBatch" class="form-label small fw-semibold">Batch</label>
+                            <select class="form-select" id="studentBatch">
+                                <option value="">Select Batch...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="studentSection" class="form-label small fw-semibold">Section</label>
+                            <select class="form-select" id="studentSection">
+                                <option value="">Select Section...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="studentSemester" class="form-label small fw-semibold">Current Semester</label>
+                            <select class="form-select" id="studentSemester">
+                                <option value="">Select Semester...</option>
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-semibold">Student Status <span class="text-danger">*</span></label>
@@ -94,20 +109,49 @@
                     </div>
 
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="studentFullName" class="form-label small fw-semibold">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="studentFullName" />
+                            <input type="text" class="form-control" id="studentFullName" placeholder="e.g. Sarah Jenkins" />
                             <div class="invalid-feedback" id="studentFullNameError"></div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label for="studentDob" class="form-label small fw-semibold">Date of Birth <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="studentDob" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="studentGender" class="form-label small fw-semibold">Gender <span class="text-danger">*</span></label>
+                            <select class="form-select" id="studentGender">
+                                <option value="">Select Gender...</option>
+                                <option value="Female">Female</option>
+                                <option value="Male">Male</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="studentNationality" class="form-label small fw-semibold">Nationality</label>
+                            <input type="text" class="form-control" id="studentNationality" placeholder="e.g. Bangladeshi" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Contact Details & Address -->
+                <div class="user-table-card p-3 p-md-4 mb-3">
+                    <h2 class="h6 fw-bold mb-1">Contact Details &amp; Address</h2>
+                    <p class="text-muted small mb-3">Email address, phone number, and residential location.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <label for="studentEmail" class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
-                            <input type="email" class="form-control" id="studentEmail" />
+                            <input type="email" class="form-control" id="studentEmail" placeholder="student@example.com" />
                             <div class="invalid-feedback" id="studentEmailError"></div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label for="studentPhone" class="form-label small fw-semibold">Phone Number <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="studentPhone" />
+                            <input type="text" class="form-control" id="studentPhone" placeholder="+1 (555) 000-0000" />
                             <div class="invalid-feedback" id="studentPhoneError"></div>
+                        </div>
+                        <div class="col-12">
+                            <label for="studentAddress" class="form-label small fw-semibold">Present Residential Address</label>
+                            <textarea class="form-control" id="studentAddress" rows="2" placeholder="123 University Campus Way, Apt 4B, City, Country..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -133,9 +177,17 @@
                     </div>
                 }
 
-                <div class="d-flex justify-content-end gap-2 mb-4">
-                    <a href="/Admin/Dashboard#students" class="btn btn-outline-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary px-4">@(isEdit ? "Update Student" : "Save Student Record")</button>
+                <div class="user-table-card p-3 d-flex justify-content-end gap-2 mb-4">
+                    <a href="/Admin/Dashboard#students" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
+                        <span>&times;</span> Cancel
+                    </a>
+                    <button type="reset" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
+                        <span>&#8634;</span> Reset Form
+                    </button>
+                    <button type="submit" class="btn btn-primary px-4 d-inline-flex align-items-center gap-2">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        <span>@(isEdit ? "Update Student" : "Save Student Record")</span>
+                    </button>
                 </div>
             </form>
 
@@ -167,6 +219,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/admin-master-data.js" asp-append-version="true"></script>
     <script src="~/js/admin-student-form.js" asp-append-version="true"></script>
 }
 

@@ -1,0 +1,57 @@
+@{
+    ViewData["Title"] = "Courses & Assignments";
+    ViewData["HideChrome"] = true;
+    ViewData["ActiveMenu"] = "Courses";
+}
+
+<div class="admin-shell">
+    @await Html.PartialAsync("_AdminSidebar")
+
+    <div class="admin-main">
+        @await Html.PartialAsync("_AdminTopbar")
+
+        <div class="p-3 p-md-4">
+            <div id="adminAlertContainer" class="mb-3"></div>
+            <div class="user-table-card p-3 p-md-4 mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h2 class="h5 fw-bold mb-0">Course List &amp; Assignments</h2>
+                        <p class="text-muted small mb-0">Create courses and assign Teachers and Students.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" id="refreshCoursesBtn" class="btn btn-outline-secondary btn-sm">Refresh</button>
+                        <a href="/Admin/CourseForm" class="btn btn-primary btn-sm">+ Add Course</a>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Course Title</th>
+                                <th>Code / Weeks</th>
+                                <th>Category</th>
+                                <th>Batches</th>
+                                <th>Assigned Teacher</th>
+                                <th>Enrolled</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coursesTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">Loading courses...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_CourseModals")
+
+@section Scripts {
+    <script src="~/js/admin-master-data.js" asp-append-version="true"></script>
+    <script src="~/js/admin-courses.js" asp-append-version="true"></script>
+}
+

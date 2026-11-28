@@ -46,6 +46,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<Department> Departments => Set<Department>();
+    public DbSet<MasterBatch> MasterBatches => Set<MasterBatch>();
+    public DbSet<MasterSection> MasterSections => Set<MasterSection>();
+    public DbSet<Semester> Semesters => Set<Semester>();
+    public DbSet<CourseBatchSection> CourseBatchSections => Set<CourseBatchSection>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -355,5 +360,70 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasIndex(token => token.TokenHash).IsUnique();
             entity.Ignore(token => token.User);
         });
+
+        modelBuilder.Entity<Student>(entity =>
+        {
+            entity.HasOne(s => s.DepartmentEntity)
+                .WithMany()
+                .HasForeignKey(s => s.DepartmentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(s => s.MasterBatch)
+                .WithMany()
+                .HasForeignKey(s => s.MasterBatchId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<CourseBatch>(entity =>
+        {
+            entity.HasOne(cb => cb.MasterBatch)
+                .WithMany()
+                .HasForeignKey(cb => cb.MasterBatchId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<CourseBatchSection>(entity =>
+        {
+            entity.HasIndex(x => new { x.CourseBatchId, x.MasterSectionId }).IsUnique();
+            entity.HasOne(x => x.CourseBatch)
+                .WithMany(cb => cb.BatchSections)
+                .HasForeignKey(x => x.CourseBatchId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(x => x.MasterSection)
+                .WithMany()
+                .HasForeignKey(x => x.MasterSectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Department>().HasData(
+            new Department { Id = 1, Name = "Computer Science & Engineering", Code = "CSE", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Department { Id = 2, Name = "Business Administration", Code = "BBA", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Department { Id = 3, Name = "Design & Media", Code = "DES", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+        );
+
+        modelBuilder.Entity<MasterBatch>().HasData(
+            new MasterBatch { Id = 1, Name = "Batch 70", Code = "B70", Sections = "A,B,C,D", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new MasterBatch { Id = 2, Name = "Batch 71", Code = "B71", Sections = "A,B,C,D", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+        );
+
+        modelBuilder.Entity<MasterSection>().HasData(
+            new MasterSection { Id = 1, Name = "A", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new MasterSection { Id = 2, Name = "B", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new MasterSection { Id = 3, Name = "C", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new MasterSection { Id = 4, Name = "D", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+        );
+
+        modelBuilder.Entity<Semester>().HasData(
+            new Semester { Id = 1, Name = "1st Semester", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Semester { Id = 2, Name = "2nd Semester", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Semester { Id = 3, Name = "3rd Semester", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Semester { Id = 4, Name = "4th Semester", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Semester { Id = 5, Name = "5th Semester", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Semester { Id = 6, Name = "6th Semester", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Semester { Id = 7, Name = "7th Semester", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Semester { Id = 8, Name = "8th Semester", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Semester { Id = 9, Name = "9th Semester", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new Semester { Id = 10, Name = "10th Semester", CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+        );
     }
 }

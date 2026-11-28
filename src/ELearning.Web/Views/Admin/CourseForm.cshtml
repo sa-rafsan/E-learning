@@ -118,9 +118,17 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="/Admin/Dashboard#courses" class="btn btn-outline-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary px-4">@(isEdit ? "Update Course" : "Create Course")</button>
+                <div class="user-table-card p-3 d-flex justify-content-end gap-2 mb-4">
+                    <a href="/Admin/Dashboard#courses" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
+                        <span>&times;</span> Cancel
+                    </a>
+                    <button type="reset" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
+                        <span>&#8634;</span> Reset Form
+                    </button>
+                    <button type="submit" class="btn btn-primary px-4 d-inline-flex align-items-center gap-2">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        <span>@(isEdit ? "Update Course" : "Create Course")</span>
+                    </button>
                 </div>
             </form>
         </div>

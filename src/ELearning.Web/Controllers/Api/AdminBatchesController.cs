@@ -18,11 +18,8 @@ public sealed class AdminBatchesController(ApplicationDbContext dbContext) : Con
     {
         var query = dbContext.CourseBatches
             .AsNoTracking()
-            .Include(b => b.Course)
-            .Include(b => b.BatchTeachers)
-                .ThenInclude(bt => bt.Teacher)
-            .Include(b => b.Enrollments)
-            .AsQueryable();
+            .AsSplitQuery()
+            .Where(b => b.Status == Domain.Enums.BatchStatus.Active);
 
         if (courseId.HasValue)
         {
@@ -39,6 +36,10 @@ public sealed class AdminBatchesController(ApplicationDbContext dbContext) : Con
                 courseCode = b.Course != null ? b.Course.CourseCode : string.Empty,
                 b.BatchName,
                 b.BatchCode,
+                b.MasterBatchId,
+                masterSectionIds = b.BatchSections.Select(bs => bs.MasterSectionId),
+                sectionNames = b.BatchSections.Select(bs => bs.MasterSection != null ? bs.MasterSection.Name : string.Empty),
+                studentIds = b.Enrollments.Select(e => e.StudentId),
                 b.StartDate,
                 b.EndDate,
                 b.Schedule,
@@ -83,6 +84,7 @@ public sealed class AdminBatchesController(ApplicationDbContext dbContext) : Con
         var batch = new CourseBatch
         {
             CourseId = dto.CourseId,
+            MasterBatchId = dto.MasterBatchId,
             BatchName = dto.BatchName.Trim(),
             BatchCode = code,
             StartDate = dto.StartDate,
@@ -91,6 +93,17 @@ public sealed class AdminBatchesController(ApplicationDbContext dbContext) : Con
             Status = dto.Status,
             CreatedAtUtc = DateTime.UtcNow
         };
+
+        if (dto.MasterSectionIds is { Count: > 0 })
+        {
+            foreach (var secId in dto.MasterSectionIds.Where(id => id > 0).Distinct())
+            {
+                batch.BatchSections.Add(new CourseBatchSection
+                {
+                    MasterSectionId = secId
+                });
+            }
+        }
 
         var distinctTeacherIds = dto.TeacherIds.Where(id => id > 0).Distinct().ToList();
         if (distinctTeacherIds.Count > 0)
@@ -186,6 +199,15 @@ public sealed class AdminBatchesController(ApplicationDbContext dbContext) : Con
             return BadRequest(new { message = "Select at least one student or batch/section." });
         }
 
+        // Remove students that were unselected from this batch
+        var existingBatchEnrollments = await dbContext.CourseEnrollments
+            .Where(e => e.CourseBatchId == batch.Id && !targetIds.Contains(e.StudentId))
+            .ToListAsync(cancellationToken);
+        if (existingBatchEnrollments.Count > 0)
+        {
+            dbContext.CourseEnrollments.RemoveRange(existingBatchEnrollments);
+        }
+
         var existingEnrollments = await dbContext.CourseEnrollments
             .Where(e => e.CourseId == batch.CourseId && targetIds.Contains(e.StudentId))
             .ToListAsync(cancellationToken);
@@ -214,5 +236,39 @@ public sealed class AdminBatchesController(ApplicationDbContext dbContext) : Con
         await dbContext.SaveChangesAsync(cancellationToken);
         return Ok(new { message = $"Enrolled {targetIds.Count} students into {batch.BatchName}." });
     }
+
+    [HttpPut("{id:int}/master-refs")]
+    public async Task<IActionResult> UpdateMasterRefs(int id, [FromBody] UpdateBatchMasterRefsDto dto, CancellationToken cancellationToken)
+    {
+        var batch = await dbContext.CourseBatches
+            .Include(b => b.BatchSections)
+            .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
+        if (batch is null) return NotFound(new { message = "Batch not found." });
+
+        batch.MasterBatchId = dto.MasterBatchId;
+        dbContext.CourseBatchSections.RemoveRange(batch.BatchSections);
+        if (dto.MasterSectionIds is { Count: > 0 })
+        {
+            foreach (var secId in dto.MasterSectionIds.Where(s => s > 0).Distinct())
+            {
+                batch.BatchSections.Add(new CourseBatchSection { MasterSectionId = secId });
+            }
+        }
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "Batch master references updated." });
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> SoftDeleteBatch(int id, CancellationToken cancellationToken)
+    {
+        var batch = await dbContext.CourseBatches.FindAsync([id], cancellationToken);
+        if (batch is null) return NotFound(new { message = "Batch not found." });
+
+        batch.Status = Domain.Enums.BatchStatus.Inactive;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = $"Batch '{batch.BatchName}' deleted." });
+    }
+
+    public sealed record UpdateBatchMasterRefsDto(int? MasterBatchId, List<int>? MasterSectionIds);
 }
 

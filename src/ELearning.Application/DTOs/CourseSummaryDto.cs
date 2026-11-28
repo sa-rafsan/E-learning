@@ -7,4 +7,5 @@ public sealed record CourseSummaryDto(
     string Instructor,
     string Category,
     int DurationHours,
-    int LessonCount);
+    int LessonCount
+    );

@@ -12,5 +12,11 @@ public sealed class StudentController : Controller
     {
         return View();
     }
+
+    [HttpGet]
+    public IActionResult Attendance()
+    {
+        return View();
+    }
 }
 

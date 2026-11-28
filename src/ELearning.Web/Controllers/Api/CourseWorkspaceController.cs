@@ -134,6 +134,56 @@ public sealed class CourseWorkspaceController(
         return Ok(enrolledCourses);
     }
 
+    [Authorize(Roles = nameof(UserRole.Student))]
+    [HttpGet("student-activities")]
+    public async Task<IActionResult> GetStudentActivities(CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        if (!userId.HasValue) return Unauthorized();
+
+        var email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email");
+        var student = await dbContext.Students.AsNoTracking()
+            .FirstOrDefaultAsync(s => s.UserId == userId.Value || (!string.IsNullOrEmpty(email) && s.Email == email), cancellationToken);
+        if (student is null) return Ok(new { quizzes = 0, assignments = 0, forums = 0, items = Array.Empty<object>() });
+
+        var enrolledCourseIds = await dbContext.CourseEnrollments.AsNoTracking()
+            .Where(e => e.StudentId == student.Id)
+            .Select(e => e.CourseId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        var activities = await dbContext.WeekActivities.AsNoTracking()
+            .Where(a => a.Week != null && enrolledCourseIds.Contains(a.Week.CourseId))
+            .OrderByDescending(a => a.Id)
+            .Select(a => new
+            {
+                a.Id,
+                a.Title,
+                type = a.Type.ToString(),
+                courseId = a.Week!.CourseId,
+                courseTitle = a.Week.Course != null ? a.Week.Course.Title : string.Empty,
+                weekNumber = a.Week.WeekNumber
+            })
+            .ToListAsync(cancellationToken);
+
+        var submittedIds = await dbContext.ActivitySubmissions.AsNoTracking()
+            .Where(s => s.StudentId == student.Id)
+            .Select(s => s.WeekActivityId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        return Ok(new
+        {
+            quizzes = activities.Count(a => a.type == "Quiz"),
+            quizzesCompleted = activities.Count(a => a.type == "Quiz" && submittedIds.Contains(a.Id)),
+            assignments = activities.Count(a => a.type == "Assignment"),
+            assignmentsCompleted = activities.Count(a => a.type == "Assignment" && submittedIds.Contains(a.Id)),
+            forums = activities.Count(a => a.type == "Forum"),
+            forumsCompleted = activities.Count(a => a.type == "Forum" && submittedIds.Contains(a.Id)),
+            items = activities
+        });
+    }
+
     [HttpGet("courses/{courseId:int}")]
     public async Task<IActionResult> GetCourseDetails(int courseId, CancellationToken cancellationToken)
     {
@@ -787,8 +837,9 @@ public sealed class CourseWorkspaceController(
         var userId = GetCurrentUserId();
         if (!userId.HasValue) return false;
 
+        var email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email");
         var teacher = await dbContext.Teachers.AsNoTracking()
-            .SingleOrDefaultAsync(t => t.UserId == userId.Value, cancellationToken);
+            .FirstOrDefaultAsync(t => t.UserId == userId.Value || (!string.IsNullOrEmpty(email) && t.Email == email), cancellationToken);
         if (teacher is null) return false;
 
         var ownsCourse = await dbContext.Courses.AsNoTracking()

@@ -2,11 +2,17 @@ $(function () {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     let allUsersCache = [];
 
-    const createTeacherModal = new bootstrap.Modal(document.getElementById("createTeacherModal"));
-    const editTeacherModal = new bootstrap.Modal(document.getElementById("editTeacherModal"));
-    const editStudentModal = new bootstrap.Modal(document.getElementById("editStudentModal"));
-    const viewUserModal = new bootstrap.Modal(document.getElementById("viewUserModal"));
-    const resetPasswordModal = new bootstrap.Modal(document.getElementById("resetPasswordModal"));
+    const createTeacherModalEl = document.getElementById("createTeacherModal");
+    const editTeacherModalEl = document.getElementById("editTeacherModal");
+    const editStudentModalEl = document.getElementById("editStudentModal");
+    const viewUserModalEl = document.getElementById("viewUserModal");
+    const resetPasswordModalEl = document.getElementById("resetPasswordModal");
+
+    const createTeacherModal = createTeacherModalEl ? new bootstrap.Modal(createTeacherModalEl) : null;
+    const editTeacherModal = editTeacherModalEl ? new bootstrap.Modal(editTeacherModalEl) : null;
+    const editStudentModal = editStudentModalEl ? new bootstrap.Modal(editStudentModalEl) : null;
+    const viewUserModal = viewUserModalEl ? new bootstrap.Modal(viewUserModalEl) : null;
+    const resetPasswordModal = resetPasswordModalEl ? new bootstrap.Modal(resetPasswordModalEl) : null;
 
     let toastTimer = null;
     function showToast(title, message, isError) {
@@ -188,7 +194,7 @@ $(function () {
     $(".admin-nav-link[data-section]").on("click", function () {
         $(".admin-nav-link").removeClass("active");
         $(this).addClass("active");
-        $("#sectionAddStudent, #sectionOverview, #sectionCharts, #sectionCourses, #sectionTeachers, #sectionStudents").addClass("d-none");
+        $("#sectionAddStudent, #sectionOverview, #sectionCharts, #sectionCourses, #sectionTeachers, #sectionStudents, #sectionBatchesDepartments").addClass("d-none");
         const sec = $(this).data("section");
         if (sec === "overview") {
             $("#sectionOverview, #sectionCharts").removeClass("d-none");
@@ -198,6 +204,8 @@ $(function () {
             $("#sectionStudents").removeClass("d-none");
         } else if (sec === "courses") {
             $("#sectionCourses").removeClass("d-none");
+        } else if (sec === "batches-departments") {
+            $("#sectionBatchesDepartments").removeClass("d-none");
         }
     });
 
@@ -614,19 +622,98 @@ $(function () {
         const id = $(this).data("id");
         $.get(`/api/admin/users/${id}`)
             .done(function (u) {
+                const initials = (u.fullName || "U").split(" ").map(p => p[0]).join("").substring(0, 2).toUpperCase();
+                const avatarHtml = u.imagePath
+                    ? `<img src="${escapeHtml(u.imagePath)}" alt="${escapeHtml(u.fullName)}" class="rounded-circle object-fit-cover border border-2 border-white shadow-sm" style="width:72px;height:72px;" />`
+                    : `<div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold fs-4 border border-2 border-white shadow-sm" style="width:72px;height:72px;">${escapeHtml(initials)}</div>`;
+                const statusBadge = u.status === "Active"
+                    ? `<span class="badge rounded-pill bg-success-subtle text-success px-3 py-1">&#9679; Active ${escapeHtml(u.role)}</span>`
+                    : `<span class="badge rounded-pill bg-warning-subtle text-warning-emphasis px-3 py-1">&#9679; ${escapeHtml(u.status)}</span>`;
+                const editHref = u.role === "Teacher" ? `/Admin/TeacherForm/${u.id}` : `/Admin/StudentForm/${u.id}`;
+                const createdDate = new Date(u.createdAtUtc).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+
                 $("#viewUserModalBody").html(`
-                    <dl class="row mb-0">
-                        <dt class="col-sm-4">Full Name</dt><dd class="col-sm-8">${escapeHtml(u.fullName)}</dd>
-                        <dt class="col-sm-4">Email</dt><dd class="col-sm-8">${escapeHtml(u.email)}</dd>
-                        <dt class="col-sm-4">Role</dt><dd class="col-sm-8">${escapeHtml(u.role)}</dd>
-                        <dt class="col-sm-4">Status</dt><dd class="col-sm-8">${escapeHtml(u.status)}</dd>
-                        <dt class="col-sm-4">Phone</dt><dd class="col-sm-8">${escapeHtml(u.phoneNumber || "-")}</dd>
-                        ${u.role === "Student" ? `
-                            <dt class="col-sm-4">Student ID</dt><dd class="col-sm-8">${escapeHtml(u.studentId || "-")}</dd>
-                            <dt class="col-sm-4">Department</dt><dd class="col-sm-8">${escapeHtml(u.department || "-")}</dd>
-                        ` : ""}
-                        <dt class="col-sm-4">Created (UTC)</dt><dd class="col-sm-8">${new Date(u.createdAtUtc).toLocaleString()}</dd>
-                    </dl>
+                    <div class="rounded-3 p-4 mb-4 text-white d-flex flex-wrap justify-content-between align-items-center gap-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+                        <div class="d-flex align-items-center gap-3">
+                            ${avatarHtml}
+                            <div>
+                                <h3 class="h4 fw-bold mb-1 text-white">${escapeHtml(u.fullName)}</h3>
+                                <div class="small text-white-50 mb-2">${escapeHtml(u.studentId || u.role)}</div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    ${u.department ? `<span class="badge rounded-pill bg-light text-dark px-3 py-1">${escapeHtml(u.department)}</span>` : ""}
+                                    ${statusBadge}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-light" onclick="window.print()">Print</button>
+                            <a href="${editHref}" class="btn btn-sm btn-primary">Edit Profile</a>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <h4 class="h6 fw-bold mb-3 pb-2 border-bottom">${u.role === "Student" ? "Academic Details" : "Faculty Details"}</h4>
+                                    <div class="d-flex justify-content-between py-2 border-bottom small">
+                                        <span class="text-muted">Role</span>
+                                        <span class="fw-semibold">${escapeHtml(u.role)}</span>
+                                    </div>
+                                    ${u.role === "Student" ? `
+                                    <div class="d-flex justify-content-between py-2 border-bottom small">
+                                        <span class="text-muted">Student ID</span>
+                                        <span class="fw-semibold">${escapeHtml(u.studentId || "-")}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-2 border-bottom small">
+                                        <span class="text-muted">Department</span>
+                                        <span class="fw-semibold">${escapeHtml(u.department || "-")}</span>
+                                    </div>` : ""}
+                                    <div class="d-flex justify-content-between py-2 small">
+                                        <span class="text-muted">Record Created</span>
+                                        <span class="fw-semibold">${escapeHtml(createdDate)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <h4 class="h6 fw-bold mb-3 pb-2 border-bottom">Personal &amp; Account Status</h4>
+                                    <div class="d-flex justify-content-between py-2 border-bottom small">
+                                        <span class="text-muted">Full Name</span>
+                                        <span class="fw-semibold">${escapeHtml(u.fullName)}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-2 border-bottom small">
+                                        <span class="text-muted">Account Status</span>
+                                        <span class="fw-semibold">${escapeHtml(u.status)}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-2 small">
+                                        <span class="text-muted">User ID</span>
+                                        <span class="fw-semibold">#${u.id}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h4 class="h6 fw-bold mb-3 pb-2 border-bottom">Contact &amp; Residence Information</h4>
+                            <div class="d-flex justify-content-between py-2 border-bottom small">
+                                <span class="text-muted">Email Address</span>
+                                <a href="mailto:${escapeHtml(u.email)}" class="fw-semibold text-decoration-none">${escapeHtml(u.email)}</a>
+                            </div>
+                            <div class="d-flex justify-content-between py-2 border-bottom small">
+                                <span class="text-muted">Telephone / Mobile</span>
+                                <span class="fw-semibold">${escapeHtml(u.phoneNumber || "-")}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-2 small">
+                                <span class="text-muted">Residential Address</span>
+                                <span class="fw-semibold">${escapeHtml(u.address || "-")}</span>
+                            </div>
+                        </div>
+                    </div>
                 `);
                 viewUserModal.show();
             })

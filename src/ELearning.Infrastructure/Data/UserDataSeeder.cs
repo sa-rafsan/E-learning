@@ -137,6 +137,15 @@ public static class UserDataSeeder
                 await userManager.AddToRoleAsync(appUser, UserRole.Student.ToString());
             }
 
+            var masterSectionId = section switch
+            {
+                "A" => 1,
+                "B" => 2,
+                "C" => 3,
+                "D" => 4,
+                _ => 1
+            };
+
             await dbContext.Students.AddAsync(new Student
             {
                 UserId = appUser.Id,
@@ -145,8 +154,11 @@ public static class UserDataSeeder
                 Email = email,
                 PhoneNumber = code,
                 Batch = BatchNumber.ToString(),
+                MasterBatchId = 1,
                 Section = section,
+                MasterSectionId = masterSectionId,
                 Department = department,
+                DepartmentId = 1,
                 CreatedAtUtc = appUser.CreatedAtUtc
             }, cancellationToken);
         }

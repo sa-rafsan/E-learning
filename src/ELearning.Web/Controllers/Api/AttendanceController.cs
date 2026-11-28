@@ -5,6 +5,7 @@ using ELearning.Application.Interfaces.Services;
 using ELearning.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ELearning.Web.Controllers.Api;
 
@@ -19,6 +20,39 @@ public sealed class AttendanceController(
     public async Task<IActionResult> GetCourses(CancellationToken cancellationToken)
     {
         var courses = await courseService.GetPublishedCoursesAsync(null, cancellationToken);
+        if (User.IsInRole(nameof(UserRole.Teacher)))
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email");
+            int.TryParse(userIdStr, out var userId);
+
+            var db = HttpContext.RequestServices.GetRequiredService<ELearning.Infrastructure.Data.ApplicationDbContext>();
+            var teacher = await db.Teachers.AsNoTracking()
+                .FirstOrDefaultAsync(t => (userId > 0 && t.UserId == userId) || (!string.IsNullOrEmpty(email) && t.Email == email), cancellationToken);
+            if (teacher is not null)
+            {
+                var directCourseIds = await db.Courses
+                    .AsNoTracking()
+                    .Where(c => c.TeacherId == teacher.Id)
+                    .Select(c => c.Id)
+                    .ToListAsync(cancellationToken);
+
+                var assignedCourseIds = await db.CourseBatches
+                    .AsNoTracking()
+                    .Where(b => b.BatchTeachers.Any(bt => bt.TeacherId == teacher.Id))
+                    .Select(b => b.CourseId)
+                    .Distinct()
+                    .ToListAsync(cancellationToken);
+
+                courses = courses
+                    .Where(c => directCourseIds.Contains(c.Id) || assignedCourseIds.Contains(c.Id))
+                    .ToList();
+            }
+            else
+            {
+                courses = [];
+            }
+        }
         return Ok(courses);
     }
 

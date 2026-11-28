@@ -141,10 +141,11 @@ public sealed class UserRepository(
         }
         else if (user.Role == UserRole.Student)
         {
+            var isAutoId = string.IsNullOrWhiteSpace(user.StudentId);
             var studentProfile = new Student
             {
                 UserId = appUser.Id,
-                StudentId = user.StudentId ?? string.Empty,
+                StudentId = isAutoId ? $"TMP-{Guid.NewGuid():N}"[..16] : user.StudentId!,
                 FullName = user.FullName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
@@ -154,6 +155,14 @@ public sealed class UserRepository(
             };
             await DbContext.Students.AddAsync(studentProfile, cancellationToken);
             await DbContext.SaveChangesAsync(cancellationToken);
+
+            if (isAutoId)
+            {
+                studentProfile.StudentId = $"{DateTime.UtcNow:yyyyMMdd}{studentProfile.Id:D4}";
+                appUser.StudentId = studentProfile.StudentId;
+                await DbContext.SaveChangesAsync(cancellationToken);
+            }
+
             appUser.StudentProfile = studentProfile;
         }
 

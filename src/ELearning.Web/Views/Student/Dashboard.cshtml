@@ -34,7 +34,12 @@
                     </a>
                 </li>
                 <li class="admin-nav-item">
-                    <a href="#attendanceHistorySection" class="admin-nav-link text-decoration-none">
+                    <a href="#activitiesSection" class="admin-nav-link text-decoration-none">
+                        <span>Quizzes, Assignments &amp; Forum</span>
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a href="/Student/Attendance" class="admin-nav-link text-decoration-none">
                         <span>My Attendance</span>
                     </a>
                 </li>
@@ -83,6 +88,74 @@
         </header>
 
         <div class="p-3 p-md-4">
+            <!-- Quizzes, Assignments & Forum Overview (Given vs Completed) -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="kpi-card d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="kpi-label mb-1">Quizzes</div>
+                            <div class="kpi-value mb-0"><span id="stuOverviewQuizzesCompleted">0</span> / <span id="stuOverviewQuizzes">0</span></div>
+                            <div class="small text-muted">Completed / Given</div>
+                        </div>
+                        <span class="badge bg-primary-subtle text-primary px-2 py-1">Quiz</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="kpi-card d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="kpi-label mb-1">Assignments</div>
+                            <div class="kpi-value mb-0"><span id="stuOverviewAssignmentsCompleted">0</span> / <span id="stuOverviewAssignments">0</span></div>
+                            <div class="small text-muted">Completed / Given</div>
+                        </div>
+                        <span class="badge bg-warning-subtle text-warning-emphasis px-2 py-1">Assignment</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="kpi-card d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="kpi-label mb-1">Forum</div>
+                            <div class="kpi-value mb-0"><span id="stuOverviewForumsCompleted">0</span> / <span id="stuOverviewForums">0</span></div>
+                            <div class="small text-muted">Completed / Given</div>
+                        </div>
+                        <span class="badge bg-info-subtle text-info-emphasis px-2 py-1">Forum</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Summary Card -->
+            <div class="user-table-card p-3 p-md-4 mb-4">
+                <div class="mb-3">
+                    <h2 class="h5 fw-bold mb-0">Attendance Summary</h2>
+                    <p class="text-muted small mb-0">Your presence, late, and absence this month</p>
+                </div>
+                <div class="row align-items-center g-4">
+                    <div class="col-md-5 d-flex justify-content-center">
+                        <div class="position-relative d-inline-flex align-items-center justify-content-center" style="width:190px;height:190px;">
+                            <svg id="stuAttDonutSvg" width="190" height="190" viewBox="0 0 190 190">
+                                <circle cx="95" cy="95" r="74" fill="none" stroke="#e2e8f0" stroke-width="24" />
+                            </svg>
+                            <div class="position-absolute text-center">
+                                <div class="h4 fw-bold mb-0 text-dark" id="stuAttPresentPct">0%</div>
+                                <div class="small fw-semibold text-muted" style="font-size:0.7rem;letter-spacing:0.05em;">PRESENT</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7 d-flex flex-column gap-2">
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 rounded-pill border" style="background:#ecfdf5;border-color:#a7f3d0 !important;">
+                            <span class="small fw-semibold text-dark"><span class="me-2" style="color:#059669;">&#9679;</span>Present</span>
+                            <span class="small fw-bold" style="color:#059669;" id="stuAttPresentPill">0% (0)</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 rounded-pill border" style="background:#fffbeb;border-color:#fde68a !important;">
+                            <span class="small fw-semibold text-dark"><span class="me-2" style="color:#d97706;">&#9679;</span>Late</span>
+                            <span class="small fw-bold" style="color:#d97706;" id="stuAttLatePill">0% (0)</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 rounded-pill border" style="background:#fef2f2;border-color:#fecaca !important;">
+                            <span class="small fw-semibold text-dark"><span class="me-2" style="color:#dc2626;">&#9679;</span>Absent</span>
+                            <span class="small fw-bold" style="color:#dc2626;" id="stuAttAbsentPill">0% (0)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Course Completion Overview (Progress & Gauges) -->
             <div class="chart-card mb-4" id="courseProgressSection">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pb-2 mb-3 border-bottom">
@@ -109,34 +182,27 @@
                 </div>
             </div>
 
-            <!-- Enrolled Courses & Weekly Workspaces -->
-            <div class="user-table-card p-3 p-md-4 mb-4">
-                <h2 class="h6 fw-bold mb-1">My Enrolled Courses &amp; Workspaces</h2>
-                <p class="text-muted small mb-3">Open any course to view General info, Teachers, Weekly Topics, Assignments, Quizzes, Forums &amp; Exams.</p>
-                <div class="row g-2" id="studentWorkspaceCoursesRow">
-                    <div class="col-12 text-muted small">Loading courses...</div>
+            <!-- Quizzes, Assignments & Forum List -->
+            <div class="user-table-card p-3 p-md-4 mb-4" id="activitiesSection">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="h5 fw-bold mb-0">Quizzes, Assignments &amp; Forum</h2>
+                        <p class="text-muted small mb-0">Click Open to go directly to any activity.</p>
+                    </div>
                 </div>
-            </div>
-
-            <!-- My Attendance Record -->
-            <div class="user-table-card p-3 p-md-4" id="attendanceHistorySection">
-                <h2 class="h5 fw-bold mb-3">My Attendance Record</h2>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle dir-table mb-0">
+                    <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Date</th>
+                                <th>Title</th>
+                                <th>Type</th>
                                 <th>Course</th>
-                                <th>Teacher</th>
-                                <th>Topic</th>
-                                <th>Status</th>
-                                <th>Remarks</th>
+                                <th>Week</th>
+                                <th class="text-end">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="studentAttendanceBody">
-                            <tr>
-                                <td colspan="6" class="text-center py-3 text-muted">Loading attendance...</td>
-                            </tr>
+                        <tbody id="studentActivitiesTableBody">
+                            <tr><td colspan="5" class="text-center py-3 text-muted small">Loading activities...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -156,6 +222,31 @@
             <div class="modal-body" id="courseLessonsModalBody"></div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+            <!-- Quizzes, Assignments & Forum List -->
+            <div class="user-table-card p-3 p-md-4 mb-4" id="activitiesSection">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="h5 fw-bold mb-0">Quizzes, Assignments &amp; Forum</h2>
+                        <p class="text-muted small mb-0">Click Open to go directly to any activity.</p>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Course</th>
+                                <th>Week</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentActivitiesTableBody">
+                            <tr><td colspan="5" class="text-center py-3 text-muted small">Loading activities...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

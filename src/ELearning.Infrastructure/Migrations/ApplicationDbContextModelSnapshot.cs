@@ -334,6 +334,9 @@ namespace ELearning.Infrastructure.Migrations
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");
 
+                    b.Property<int?>("MasterBatchId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Schedule")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -346,10 +349,36 @@ namespace ELearning.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MasterBatchId");
+
                     b.HasIndex("CourseId", "BatchCode")
                         .IsUnique();
 
                     b.ToTable("CourseBatches");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.CourseBatchSection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseBatchId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MasterSectionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MasterSectionId");
+
+                    b.HasIndex("CourseBatchId", "MasterSectionId")
+                        .IsUnique();
+
+                    b.ToTable("CourseBatchSections");
                 });
 
             modelBuilder.Entity("ELearning.Domain.Entities.CourseEnrollment", b =>
@@ -428,6 +457,53 @@ namespace ELearning.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("CourseWeeks");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.Department", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Departments");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "CSE",
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Computer Science & Engineering"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "BBA",
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Business Administration"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "DES",
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Design & Media"
+                        });
                 });
 
             modelBuilder.Entity("ELearning.Domain.Entities.ForumPost", b =>
@@ -536,6 +612,98 @@ namespace ELearning.Infrastructure.Migrations
                     b.ToTable("LessonProgresses");
                 });
 
+            modelBuilder.Entity("ELearning.Domain.Entities.MasterBatch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Sections")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MasterBatches");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "B70",
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Batch 70",
+                            Sections = "A,B,C,D"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "B71",
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Batch 71",
+                            Sections = "A,B,C,D"
+                        });
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.MasterSection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MasterSections");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "A"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "B"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "C"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "D"
+                        });
+                });
+
             modelBuilder.Entity("ELearning.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -575,6 +743,88 @@ namespace ELearning.Infrastructure.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
+            modelBuilder.Entity("ELearning.Domain.Entities.Semester", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Semesters");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "1st Semester"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "2nd Semester"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "3rd Semester"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "4th Semester"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "5th Semester"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "6th Semester"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "7th Semester"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "8th Semester"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "9th Semester"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "10th Semester"
+                        });
+                });
+
             modelBuilder.Entity("ELearning.Domain.Entities.Student", b =>
                 {
                     b.Property<int>("Id")
@@ -603,6 +853,9 @@ namespace ELearning.Infrastructure.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
 
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("EducationalBackground")
                         .HasColumnType("nvarchar(max)");
 
@@ -622,6 +875,12 @@ namespace ELearning.Infrastructure.Migrations
                     b.Property<string>("ImagePath")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("MasterBatchId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MasterSectionId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Nationality")
                         .HasColumnType("nvarchar(max)");
@@ -647,8 +906,14 @@ namespace ELearning.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DepartmentId");
+
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("MasterBatchId");
+
+                    b.HasIndex("MasterSectionId");
 
                     b.HasIndex("StudentId")
                         .IsUnique();
@@ -1245,7 +1510,33 @@ namespace ELearning.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ELearning.Domain.Entities.MasterBatch", "MasterBatch")
+                        .WithMany()
+                        .HasForeignKey("MasterBatchId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Course");
+
+                    b.Navigation("MasterBatch");
+                });
+
+            modelBuilder.Entity("ELearning.Domain.Entities.CourseBatchSection", b =>
+                {
+                    b.HasOne("ELearning.Domain.Entities.CourseBatch", "CourseBatch")
+                        .WithMany("BatchSections")
+                        .HasForeignKey("CourseBatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ELearning.Domain.Entities.MasterSection", "MasterSection")
+                        .WithMany()
+                        .HasForeignKey("MasterSectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CourseBatch");
+
+                    b.Navigation("MasterSection");
                 });
 
             modelBuilder.Entity("ELearning.Domain.Entities.CourseEnrollment", b =>
@@ -1351,11 +1642,31 @@ namespace ELearning.Infrastructure.Migrations
 
             modelBuilder.Entity("ELearning.Domain.Entities.Student", b =>
                 {
+                    b.HasOne("ELearning.Domain.Entities.Department", "DepartmentEntity")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ELearning.Domain.Entities.MasterBatch", "MasterBatch")
+                        .WithMany()
+                        .HasForeignKey("MasterBatchId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ELearning.Domain.Entities.MasterSection", "MasterSection")
+                        .WithMany()
+                        .HasForeignKey("MasterSectionId");
+
                     b.HasOne("ELearning.Infrastructure.Identity.ApplicationUser", null)
                         .WithOne("StudentProfile")
                         .HasForeignKey("ELearning.Domain.Entities.Student", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("DepartmentEntity");
+
+                    b.Navigation("MasterBatch");
+
+                    b.Navigation("MasterSection");
                 });
 
             modelBuilder.Entity("ELearning.Domain.Entities.Teacher", b =>
@@ -1495,6 +1806,8 @@ namespace ELearning.Infrastructure.Migrations
 
             modelBuilder.Entity("ELearning.Domain.Entities.CourseBatch", b =>
                 {
+                    b.Navigation("BatchSections");
+
                     b.Navigation("BatchTeachers");
 
                     b.Navigation("Enrollments");

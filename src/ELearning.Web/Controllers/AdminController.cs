@@ -14,6 +14,30 @@ public sealed class AdminController : Controller
     }
 
     [HttpGet]
+    public IActionResult Teachers()
+    {
+        return View();
+    }
+
+    [HttpGet]
+    public IActionResult Students()
+    {
+        return View();
+    }
+
+    [HttpGet]
+    public IActionResult Courses()
+    {
+        return View();
+    }
+
+    [HttpGet]
+    public IActionResult Settings()
+    {
+        return View();
+    }
+
+    [HttpGet]
     public IActionResult StudentForm(int? id = null)
     {
         ViewData["StudentUserId"] = id;

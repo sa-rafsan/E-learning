@@ -53,9 +53,32 @@
             <form id="teacherForm" data-user-id="@(teacherUserId?.ToString() ?? "")" novalidate>
                 <input type="hidden" id="teacherImagePath" value="" />
 
+                <!-- Card 1: Teacher Identification & Status -->
                 <div class="user-table-card p-3 p-md-4 mb-3">
-                    <h2 class="h6 fw-bold mb-1">Teacher Profile &amp; Photo</h2>
-                    <p class="text-muted small mb-3">Upload faculty photo, contact details, and status.</p>
+                    <h2 class="h6 fw-bold mb-1">Teacher Identification &amp; Status</h2>
+                    <p class="text-muted small mb-3">Department assignment and account status.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="teacherDepartment" class="form-label small fw-semibold">Department</label>
+                            <select class="form-select" id="teacherDepartment">
+                                <option value="">Select Department...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Account Status</label>
+                            <input type="hidden" id="teacherStatus" value="1" />
+                            <div class="row g-2">
+                                <div class="col-6"><button type="button" class="status-pill-btn active-status" data-status-val="1">Active Teacher</button></div>
+                                <div class="col-6"><button type="button" class="status-pill-btn" data-status-val="2">Inactive</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Personal Information & Photo -->
+                <div class="user-table-card p-3 p-md-4 mb-3">
+                    <h2 class="h6 fw-bold mb-1">Personal Information &amp; Photo</h2>
+                    <p class="text-muted small mb-3">Personal identity, date of birth, gender, and faculty profile picture.</p>
 
                     <div class="d-flex flex-wrap align-items-center gap-3 p-3 bg-light rounded border mb-3">
                         <img id="teacherPhotoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%23f3e8ff'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-size='22' font-family='sans-serif' fill='%237e22ce'%3ET%3C/text%3E%3C/svg%3E"
@@ -68,27 +91,48 @@
                     </div>
 
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <label for="teacherFullName" class="form-label small fw-semibold">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="teacherFullName" />
+                            <input type="text" class="form-control" id="teacherFullName" placeholder="e.g. Nadia Williams" />
                             <div class="invalid-feedback" id="teacherFullNameError"></div>
                         </div>
+                        <div class="col-md-3">
+                            <label for="teacherDob" class="form-label small fw-semibold">Date of Birth</label>
+                            <input type="date" class="form-control" id="teacherDob" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="teacherGender" class="form-label small fw-semibold">Gender</label>
+                            <select class="form-select" id="teacherGender">
+                                <option value="">Select Gender...</option>
+                                <option value="Female">Female</option>
+                                <option value="Male">Male</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="teacherNationality" class="form-label small fw-semibold">Nationality</label>
+                            <input type="text" class="form-control" id="teacherNationality" placeholder="e.g. Bangladeshi" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Contact Details & Address -->
+                <div class="user-table-card p-3 p-md-4 mb-3">
+                    <h2 class="h6 fw-bold mb-1">Contact Details &amp; Address</h2>
+                    <p class="text-muted small mb-3">Email address, phone number, and residential location.</p>
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <label for="teacherEmail" class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
-                            <input type="email" class="form-control" id="teacherEmail" />
+                            <input type="email" class="form-control" id="teacherEmail" placeholder="teacher@example.com" />
                             <div class="invalid-feedback" id="teacherEmailError"></div>
                         </div>
                         <div class="col-md-6">
                             <label for="teacherPhone" class="form-label small fw-semibold">Phone Number</label>
-                            <input type="text" class="form-control" id="teacherPhone" />
+                            <input type="text" class="form-control" id="teacherPhone" placeholder="+1 (555) 000-0000" />
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Account Status</label>
-                            <input type="hidden" id="teacherStatus" value="1" />
-                            <div class="row g-2">
-                                <div class="col-6"><button type="button" class="status-pill-btn active-status" data-status-val="1">Active Teacher</button></div>
-                                <div class="col-6"><button type="button" class="status-pill-btn" data-status-val="2">Inactive</button></div>
-                            </div>
+                        <div class="col-12">
+                            <label for="teacherAddress" class="form-label small fw-semibold">Present Residential Address</label>
+                            <textarea class="form-control" id="teacherAddress" rows="2" placeholder="123 University Campus Way, Apt 4B, City, Country..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -113,9 +157,17 @@
                     </div>
                 }
 
-                <div class="d-flex justify-content-end gap-2 mb-4">
-                    <a href="/Admin/Dashboard#teachers" class="btn btn-outline-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary px-4">@(isEdit ? "Update Teacher" : "Save Teacher Record")</button>
+                <div class="user-table-card p-3 d-flex justify-content-end gap-2 mb-4">
+                    <a href="/Admin/Dashboard#teachers" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
+                        <span>&times;</span> Cancel
+                    </a>
+                    <button type="reset" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
+                        <span>&#8634;</span> Reset Form
+                    </button>
+                    <button type="submit" class="btn btn-primary px-4 d-inline-flex align-items-center gap-2">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        <span>@(isEdit ? "Update Teacher" : "Save Teacher Record")</span>
+                    </button>
                 </div>
             </form>
 
@@ -146,6 +198,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/admin-master-data.js" asp-append-version="true"></script>
     <script src="~/js/admin-teacher-form.js" asp-append-version="true"></script>
 }
 

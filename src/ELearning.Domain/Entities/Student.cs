@@ -16,9 +16,18 @@ public class Student
 
     public string? Batch { get; set; }
 
+    public int? MasterBatchId { get; set; }
+    public MasterBatch? MasterBatch { get; set; }
+
     public string? Section { get; set; }
 
+    public int? MasterSectionId { get; set; }
+    public MasterSection? MasterSection { get; set; }
+
     public string? Department { get; set; }
+
+    public int? DepartmentId { get; set; }
+    public Department? DepartmentEntity { get; set; }
 
     public string? ImagePath { get; set; }
 

@@ -1,0 +1,14 @@
+<header class="admin-topbar">
+    <div>
+        <h1 class="h4 fw-bold mb-0 text-dark">Academic Dashboard</h1>
+        <p class="text-muted small mb-0">Overview of university enrollment, courses, and user metrics</p>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <span class="admin-pill-badge">Term: 2026-2027</span>
+        <span class="admin-pill-badge">Admin</span>
+        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline m-0">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Sign Out</button>
+        </form>
+    </div>
+</header>
+

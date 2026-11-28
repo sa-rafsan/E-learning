@@ -1,6 +1,7 @@
 $(function () {
     let coursesCache = [];
-    const lessonsModal = new bootstrap.Modal(document.getElementById("courseLessonsModal"));
+    const lessonsModalEl = document.getElementById("courseLessonsModal");
+    const lessonsModal = lessonsModalEl ? new bootstrap.Modal(lessonsModalEl) : null;
 
     const gaugeThemes = [
         { card: "gauge-theme-blue", stroke: "#2563eb", text: "#1d4ed8" },
@@ -117,22 +118,135 @@ $(function () {
 
     $.get("/api/attendance/my")
         .done(function (records) {
-            if (!records.length) {
-                $("#studentAttendanceBody").html('<tr><td colspan="6" class="text-center py-3 text-muted">No attendance records yet.</td></tr>');
-                return;
+            const total = records.length;
+            const presentCount = records.filter(r => r.status === "Present").length;
+            const lateCount = records.filter(r => r.status === "Late").length;
+            const absentCount = records.filter(r => r.status === "Absent").length;
+
+            const pPct = total ? ((presentCount / total) * 100).toFixed(2) : "0.00";
+            const lPct = total ? ((lateCount / total) * 100).toFixed(2) : "0.00";
+            const aPct = total ? ((absentCount / total) * 100).toFixed(2) : "0.00";
+
+            $("#stuAttPresentPct").text(`${pPct}%`);
+            $("#stuAttPresentPill").text(`${pPct}% (${presentCount})`);
+            $("#stuAttLatePill").text(`${lPct}% (${lateCount})`);
+            $("#stuAttAbsentPill").text(`${aPct}% (${absentCount})`);
+
+            const circ = 2 * Math.PI * 74;
+            const pLen = total ? (presentCount / total) * circ : 0;
+            const lLen = total ? (lateCount / total) * circ : 0;
+            const aLen = total ? (absentCount / total) * circ : 0;
+            $("#stuAttDonutSvg").html(`
+                <circle cx="95" cy="95" r="74" fill="none" stroke="#e2e8f0" stroke-width="24" />
+                <circle cx="95" cy="95" r="74" fill="none" stroke="#10b981" stroke-width="24" stroke-dasharray="${pLen} ${circ}" transform="rotate(-90 95 95)" />
+                <circle cx="95" cy="95" r="74" fill="none" stroke="#f59e0b" stroke-width="24" stroke-dasharray="${lLen} ${circ}" stroke-dashoffset="-${pLen}" transform="rotate(-90 95 95)" />
+                <circle cx="95" cy="95" r="74" fill="none" stroke="#ef4444" stroke-width="24" stroke-dasharray="${aLen} ${circ}" stroke-dashoffset="-${pLen + lLen}" transform="rotate(-90 95 95)" />
+            `);
+
+            let allAttendanceRecords = records;
+            let activeAttFilter = "";
+
+            function renderAttendanceGrid(list) {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth();
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const recMap = new Map();
+                list.forEach(r => recMap.set(r.sessionDate, r));
+
+                const daysHeader = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+                    .map(d => `<div class="text-center small fw-bold text-muted py-2 border-bottom bg-light">${d}</div>`).join("");
+
+                let cells = "";
+                for (let i = 0; i < firstDay; i++) {
+                    cells += `<div class="border p-2 bg-light-subtle" style="min-height:84px;"></div>`;
+                }
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const mm = String(month + 1).padStart(2, "0");
+                    const dd = String(day).padStart(2, "0");
+                    const dateStr = `${year}-${mm}-${dd}`;
+                    const rec = recMap.get(dateStr);
+                    const st = rec ? rec.status : "";
+                    const badgeCls = st === "Present" ? "bg-success-subtle text-success"
+                        : st === "Late" ? "bg-warning-subtle text-warning-emphasis"
+                        : st === "Absent" ? "bg-danger-subtle text-danger"
+                        : "bg-light text-muted";
+                    cells += `
+                        <div class="border p-2 bg-white" style="min-height:84px;">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="small fw-bold">${dd}</span>
+                                ${st ? `<span class="badge ${badgeCls}" style="font-size:0.65rem;">${escapeHtml(st.toUpperCase())}</span>` : ""}
+                            </div>
+                            ${rec ? `<div class="text-truncate text-muted" style="font-size:0.7rem;" title="${escapeHtml(rec.courseTitle)}">${escapeHtml(rec.courseTitle)}</div>` : ""}
+                        </div>`;
+                }
+                $("#attendanceGridView").html(`<div style="display:grid;grid-template-columns:repeat(7,1fr);border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">${daysHeader}${cells}</div>`);
             }
 
-            const rows = records.map(r => `
-                <tr>
-                    <td>${escapeHtml(r.sessionDate)}</td>
-                    <td class="fw-semibold">${escapeHtml(r.courseTitle)}</td>
-                    <td>${escapeHtml(r.teacherName)}</td>
-                    <td>${escapeHtml(r.topic || "-")}</td>
-                    <td><span class="badge ${statusBadge(r.status)}">${escapeHtml(r.status)}</span></td>
-                    <td>${escapeHtml(r.remarks || "-")}</td>
-                </tr>`);
+            function renderAttendanceYearly(list) {
+                const year = new Date().getFullYear();
+                const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                const recMap = new Map();
+                list.forEach(r => recMap.set(r.sessionDate, r.status));
 
-            $("#studentAttendanceBody").html(rows.join(""));
+                const cards = months.map((mName, mIdx) => {
+                    const firstDay = new Date(year, mIdx, 1).getDay();
+                    const daysInMonth = new Date(year, mIdx + 1, 0).getDate();
+                    let dayCells = "";
+                    for (let i = 0; i < firstDay; i++) dayCells += `<span></span>`;
+                    for (let d = 1; d <= daysInMonth; d++) {
+                        const dateStr = `${year}-${String(mIdx + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+                        const st = recMap.get(dateStr);
+                        const cls = st === "Present" ? "bg-success-subtle text-success fw-bold"
+                            : st === "Late" ? "bg-warning-subtle text-warning-emphasis fw-bold"
+                            : st === "Absent" ? "bg-danger-subtle text-danger fw-bold"
+                            : "text-muted";
+                        dayCells += `<span class="d-inline-flex align-items-center justify-content-center rounded ${cls}" style="width:24px;height:24px;font-size:0.7rem;">${d}</span>`;
+                    }
+                    return `
+                        <div class="col-md-6 col-xl-3">
+                            <div class="border rounded p-2 bg-white h-100">
+                                <div class="small fw-bold text-primary mb-2">${mName}</div>
+                                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;">
+                                    <span class="text-muted" style="font-size:0.65rem;">S</span><span class="text-muted" style="font-size:0.65rem;">M</span><span class="text-muted" style="font-size:0.65rem;">T</span><span class="text-muted" style="font-size:0.65rem;">W</span><span class="text-muted" style="font-size:0.65rem;">T</span><span class="text-muted" style="font-size:0.65rem;">F</span><span class="text-muted" style="font-size:0.65rem;">S</span>
+                                    ${dayCells}
+                                </div>
+                            </div>
+                        </div>`;
+                }).join("");
+                $("#attendanceYearlyView").html(`<div class="row g-3">${cards}</div>`);
+            }
+
+            function refreshAttendanceViews() {
+                const filtered = activeAttFilter
+                    ? allAttendanceRecords.filter(r => r.status === activeAttFilter)
+                    : allAttendanceRecords;
+                renderAttendanceGrid(filtered);
+                renderAttendanceYearly(filtered);
+            }
+
+            $(document).on("click", ".att-view-btn", function () {
+                $(".att-view-btn").removeClass("active");
+                $(this).addClass("active");
+                const view = $(this).data("view");
+                if (view === "yearly") {
+                    $("#attendanceGridView").addClass("d-none");
+                    $("#attendanceYearlyView").removeClass("d-none");
+                } else {
+                    $("#attendanceYearlyView").addClass("d-none");
+                    $("#attendanceGridView").removeClass("d-none");
+                }
+            });
+
+            $(document).on("click", ".att-filter-btn", function () {
+                $(".att-filter-btn").removeClass("btn-dark").addClass("btn-outline-secondary");
+                $(this).removeClass("btn-outline-secondary").addClass("btn-dark");
+                activeAttFilter = $(this).data("status") || "";
+                refreshAttendanceViews();
+            });
+
+            refreshAttendanceViews();
         })
         .fail(function () {
             $("#studentAttendanceBody").html('<tr><td colspan="6" class="text-center py-3 text-danger">Unable to load attendance records.</td></tr>');
@@ -157,5 +271,37 @@ $(function () {
         $("#studentWorkspaceCoursesRow").html(html);
     });
 
+    function loadStudentActivities() {
+        $.get("/api/workspace/student-activities")
+            .done(function (res) {
+                $("#stuOverviewQuizzes").text(res.quizzes || 0);
+                $("#stuOverviewQuizzesCompleted").text(res.quizzesCompleted || 0);
+                $("#stuOverviewAssignments").text(res.assignments || 0);
+                $("#stuOverviewAssignmentsCompleted").text(res.assignmentsCompleted || 0);
+                $("#stuOverviewForums").text(res.forums || 0);
+                $("#stuOverviewForumsCompleted").text(res.forumsCompleted || 0);
+
+                const items = res.items || [];
+                const $tbody = $("#studentActivitiesTableBody");
+                if ($tbody.length) {
+                    if (!items.length) {
+                        $tbody.html('<tr><td colspan="5" class="text-center py-3 text-muted small">No quizzes, assignments, or forum topics yet.</td></tr>');
+                        return;
+                    }
+                    $tbody.html(items.map(a => `
+                        <tr>
+                            <td class="fw-semibold">${escapeHtml(a.title)}</td>
+                            <td><span class="badge bg-light text-dark border">${escapeHtml(a.type)}</span></td>
+                            <td class="small text-muted">${escapeHtml(a.courseTitle)}</td>
+                            <td class="small">Week ${a.weekNumber}</td>
+                            <td class="text-end">
+                                <a href="/Workspace/Course/${a.courseId}" class="btn btn-sm btn-outline-primary">Open</a>
+                            </td>
+                        </tr>`).join(""));
+                }
+            });
+    }
+
     loadCourseProgress();
+    loadStudentActivities();
 });

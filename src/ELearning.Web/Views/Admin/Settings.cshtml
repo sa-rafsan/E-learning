@@ -1,0 +1,171 @@
+@{
+    ViewData["Title"] = "Settings - Batches, Departments, Sections & Semesters";
+    ViewData["HideChrome"] = true;
+    ViewData["ActiveMenu"] = "Settings";
+}
+
+<div class="admin-shell">
+    @await Html.PartialAsync("_AdminSidebar")
+
+    <div class="admin-main">
+        @await Html.PartialAsync("_AdminTopbar")
+
+        <div class="p-3 p-md-4">
+            <div id="masterDataAlert" class="mb-3"></div>
+            <div class="row g-4 mb-4">
+                <!-- Departments Card -->
+                <div class="col-lg-6">
+                    <div class="user-table-card p-3 p-md-4 h-100">
+                        <div class="mb-3">
+                            <h2 class="h5 fw-bold mb-0">Departments</h2>
+                            <p class="text-muted small mb-0">Create and edit departments; this list populates department dropdowns across the portal.</p>
+                        </div>
+                        <form id="createDepartmentForm" class="row g-2 align-items-end mb-3 p-3 bg-light rounded border">
+                            <input type="hidden" id="editDeptId" />
+                            <div class="col-sm-6">
+                                <label for="deptNameInput" class="form-label small fw-semibold mb-1">Department Name *</label>
+                                <input type="text" class="form-control form-control-sm" id="deptNameInput" placeholder="e.g. Computer Science" required />
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="deptCodeInput" class="form-label small fw-semibold mb-1">Code *</label>
+                                <input type="text" class="form-control form-control-sm" id="deptCodeInput" placeholder="e.g. CSE" required />
+                            </div>
+                            <div class="col-sm-3 d-flex gap-1">
+                                <button type="submit" class="btn btn-primary btn-sm w-100" id="deptSubmitBtn">+ Add</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="deptCancelEditBtn">Cancel</button>
+                            </div>
+                        </form>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Department Name</th>
+                                        <th>Code</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="departmentsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Batches Card -->
+                <div class="col-lg-6">
+                    <div class="user-table-card p-3 p-md-4 h-100">
+                        <div class="mb-3">
+                            <h2 class="h5 fw-bold mb-0">Batches</h2>
+                            <p class="text-muted small mb-0">Create and edit batches with sections.</p>
+                        </div>
+                        <form id="createMasterBatchForm" class="row g-2 align-items-end mb-3 p-3 bg-light rounded border">
+                            <input type="hidden" id="editMasterBatchId" />
+                            <div class="col-sm-6">
+                                <label for="masterBatchNameInput" class="form-label small fw-semibold mb-1">Batch Name *</label>
+                                <input type="text" class="form-control form-control-sm" id="masterBatchNameInput" placeholder="e.g. Batch 70" required />
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="masterBatchCodeInput" class="form-label small fw-semibold mb-1">Code *</label>
+                                <input type="text" class="form-control form-control-sm" id="masterBatchCodeInput" placeholder="e.g. B70" required />
+                            </div>
+                            <div class="col-sm-3 d-flex gap-1">
+                                <button type="submit" class="btn btn-primary btn-sm w-100" id="masterBatchSubmitBtn">+ Add</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="masterBatchCancelEditBtn">Cancel</button>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <label class="form-label small fw-semibold mb-1">Sections</label>
+                                <div class="dropdown" id="masterBatchSectionsDropdown">
+                                    <button class="btn btn-sm btn-outline-secondary bg-white text-dark dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" type="button" id="masterBatchSectionsBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                        <span id="masterBatchSectionsLabel" class="text-truncate">Select Sections...</span>
+                                    </button>
+                                    <div class="dropdown-menu w-100 p-2 shadow-sm" id="masterBatchSectionsMenu" style="max-height: 200px; overflow-y: auto;"></div>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Batch Name</th>
+                                        <th>Code</th>
+                                        <th>Sections</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="masterBatchesTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sections Card -->
+                <div class="col-lg-6">
+                    <div class="user-table-card p-3 p-md-4 h-100">
+                        <div class="mb-3">
+                            <h2 class="h5 fw-bold mb-0">Sections</h2>
+                            <p class="text-muted small mb-0">Create and edit sections (e.g. A, B, C, D); they appear in the Batch sections dropdown.</p>
+                        </div>
+                        <form id="createSectionForm" class="row g-2 align-items-end mb-3 p-3 bg-light rounded border">
+                            <input type="hidden" id="editSectionId" />
+                            <div class="col-sm-8">
+                                <label for="sectionNameInput" class="form-label small fw-semibold mb-1">Section Name *</label>
+                                <input type="text" class="form-control form-control-sm" id="sectionNameInput" placeholder="e.g. A" required />
+                            </div>
+                            <div class="col-sm-4 d-flex gap-1">
+                                <button type="submit" class="btn btn-primary btn-sm w-100" id="sectionSubmitBtn">+ Add</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="sectionCancelEditBtn">Cancel</button>
+                            </div>
+                        </form>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Section Name</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="masterSectionsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Semesters Card -->
+                <div class="col-lg-6">
+                    <div class="user-table-card p-3 p-md-4 h-100">
+                        <div class="mb-3">
+                            <h2 class="h5 fw-bold mb-0">Semesters</h2>
+                            <p class="text-muted small mb-0">Manage semesters (default 1st–10th Semester seeded); populates student semester dropdowns.</p>
+                        </div>
+                        <form id="createSemesterForm" class="row g-2 align-items-end mb-3 p-3 bg-light rounded border">
+                            <input type="hidden" id="editSemesterId" />
+                            <div class="col-sm-8">
+                                <label for="semesterNameInput" class="form-label small fw-semibold mb-1">Semester Name *</label>
+                                <input type="text" class="form-control form-control-sm" id="semesterNameInput" placeholder="e.g. 11th Semester" required />
+                            </div>
+                            <div class="col-sm-4 d-flex gap-1">
+                                <button type="submit" class="btn btn-primary btn-sm w-100" id="semesterSubmitBtn">+ Add</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="semesterCancelEditBtn">Cancel</button>
+                            </div>
+                        </form>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Semester Name</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="masterSemestersTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin-master-data.js" asp-append-version="true"></script>
+}
+

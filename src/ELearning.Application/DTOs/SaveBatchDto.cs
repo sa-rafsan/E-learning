@@ -19,5 +19,9 @@ public sealed class SaveBatchDto
     public BatchStatus Status { get; set; } = BatchStatus.Active;
 
     public List<int> TeacherIds { get; set; } = [];
+
+    public int? MasterBatchId { get; set; }
+
+    public List<int>? MasterSectionIds { get; set; }
 }
 
