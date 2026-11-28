@@ -16,19 +16,81 @@ $(function () {
         return $("<div>").text(text ?? "").html();
     }
 
+    function addQualRow(q) {
+        const deg = escapeHtml(q?.degreeName || "");
+        const inst = escapeHtml(q?.institutionName || "");
+        const yr = q?.passingYear || "";
+        $("#qualificationsContainer").append(`
+            <div class="row g-2 qual-row align-items-center">
+                <div class="col-md-5"><input type="text" class="form-control form-control-sm qual-degree" placeholder="Degree (e.g. M.Sc in CSE)" value="${deg}" /></div>
+                <div class="col-md-5"><input type="text" class="form-control form-control-sm qual-inst" placeholder="Institution" value="${inst}" /></div>
+                <div class="col-md-2 d-flex gap-1">
+                    <input type="number" class="form-control form-control-sm qual-year" placeholder="Year" value="${yr}" />
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-qual-btn">&times;</button>
+                </div>
+            </div>`);
+    }
+
+    $(document).on("click", ".remove-qual-btn", function () { $(this).closest(".qual-row").remove(); });
+    $("#addQualificationBtn").on("click", () => addQualRow({}));
+
     $.get("/api/account/profile").done(function (p) {
-        if (p.imagePath) {
-            $("#profilePhotoPreview").attr("src", p.imagePath);
+        if (p.imagePath) $("#profilePhotoPreview").attr("src", p.imagePath);
+        $("#profFullName").val(p.fullName || "");
+        $("#profEmail").val(p.email || "");
+        $("#profPhone").val(p.phoneNumber || "");
+        $("#profNationality").val(p.nationality || "");
+        $("#profCountry").val(p.country || "");
+        $("#profAddress").val(p.address || "");
+        $("#profDob").val(p.dateOfBirth || "");
+        $("#profGender").val(p.gender || "");
+        $("#profEduBg").val(p.educationalBackground || "");
+        $("#profSpecialization").val(p.specialization || "");
+        $("#profExperience").val(p.professionalExperience || "");
+        $("#profBio").val(p.shortBiography || "");
+
+        if ($("#qualificationsContainer").length && p.qualifications) {
+            p.qualifications.forEach(addQualRow);
         }
-        $("#profileDetailsList").html(`
-            <dt class="col-sm-4 text-muted">Full Name</dt><dd class="col-sm-8 fw-semibold">${escapeHtml(p.fullName)}</dd>
-            <dt class="col-sm-4 text-muted">Email</dt><dd class="col-sm-8">${escapeHtml(p.email)}</dd>
-            <dt class="col-sm-4 text-muted">Role</dt><dd class="col-sm-8">${escapeHtml(p.role)}</dd>
-            <dt class="col-sm-4 text-muted">Phone</dt><dd class="col-sm-8">${escapeHtml(p.phoneNumber || "-")}</dd>
-            ${p.studentId ? `<dt class="col-sm-4 text-muted">Student ID</dt><dd class="col-sm-8">${escapeHtml(p.studentId)}</dd>` : ""}
-            ${p.department ? `<dt class="col-sm-4 text-muted">Department</dt><dd class="col-sm-8">${escapeHtml(p.department)}</dd>` : ""}
-            <dt class="col-sm-4 text-muted">Status</dt><dd class="col-sm-8">${escapeHtml(p.status)}</dd>
-        `);
+    });
+
+    $("#selfProfileForm").on("submit", function (e) {
+        e.preventDefault();
+        const fullName = ($("#profFullName").val() || "").trim();
+        if (!fullName) {
+            showToast("Validation Error", "Full Name is required.", true);
+            return;
+        }
+
+        const quals = [];
+        $(".qual-row").each(function () {
+            const d = ($(this).find(".qual-degree").val() || "").trim();
+            const i = ($(this).find(".qual-inst").val() || "").trim();
+            const y = parseInt($(this).find(".qual-year").val(), 10);
+            if (d) quals.push({ degreeName: d, institutionName: i, passingYear: isNaN(y) ? null : y });
+        });
+
+        $.ajax({
+            url: "/api/account/profile",
+            method: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify({
+                fullName,
+                phoneNumber: ($("#profPhone").val() || "").trim() || null,
+                address: ($("#profAddress").val() || "").trim() || null,
+                nationality: ($("#profNationality").val() || "").trim() || null,
+                country: ($("#profCountry").val() || "").trim() || null,
+                dateOfBirth: $("#profDob").val() || null,
+                gender: $("#profGender").val() || null,
+                educationalBackground: ($("#profEduBg").val() || "").trim() || null,
+                specialization: ($("#profSpecialization").val() || "").trim() || null,
+                professionalExperience: ($("#profExperience").val() || "").trim() || null,
+                shortBiography: ($("#profBio").val() || "").trim() || null,
+                qualifications: $("#qualificationsContainer").length ? quals : null
+            }),
+            success: () => showToast("Profile Saved", "Your profile details have been updated.", false),
+            error: xhr => showToast("Save Error", xhr.responseJSON?.message || "Unable to save profile.", true)
+        });
     });
 
     $("#profilePhotoInput").on("change", function () {

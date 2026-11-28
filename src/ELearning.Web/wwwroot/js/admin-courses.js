@@ -6,6 +6,7 @@ $(function () {
     const createCourseModal = new bootstrap.Modal(document.getElementById("createCourseModal"));
     const assignTeacherModal = new bootstrap.Modal(document.getElementById("assignTeacherModal"));
     const assignStudentsModal = new bootstrap.Modal(document.getElementById("assignStudentsModal"));
+    const manageBatchesModal = new bootstrap.Modal(document.getElementById("manageBatchesModal"));
 
     function escapeHtml(text) {
         return $("<div>").text(text ?? "").html();
@@ -47,19 +48,17 @@ $(function () {
             return `
             <tr>
                 <td class="fw-semibold">${thumb}${escapeHtml(c.title)}</td>
+                <td><span class="badge bg-light text-dark border">${escapeHtml(c.courseCode || "-")}</span> <span class="small text-muted">${c.durationWeeks || 12}w</span></td>
                 <td>${escapeHtml(c.category)}</td>
-                <td>${c.durationHours}h</td>
+                <td><span class="badge bg-info-subtle text-info-emphasis">${c.batchesCount || 0} batches</span></td>
                 <td>${escapeHtml(c.teacherName || "TBA")}</td>
                 <td><span class="badge bg-secondary-subtle text-secondary">${c.enrolledStudentsCount} students</span></td>
-                <td>
-                    <span class="badge ${c.isPublished ? "bg-success-subtle text-success" : "bg-warning-subtle text-warning-emphasis"}">
-                        ${c.isPublished ? "Published" : "Draft"}
-                    </span>
-                </td>
                 <td class="text-end text-nowrap">
+                    <a href="/Workspace/Course/${c.id}" class="btn btn-sm btn-outline-success">Workspace</a>
                     <a href="/Admin/CourseForm/${c.id}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                    <button type="button" class="btn btn-sm btn-outline-primary btn-assign-teacher" data-id="${c.id}">Assign Teacher</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark btn-assign-students" data-id="${c.id}">Assign Students</button>
+                    <button type="button" class="btn btn-sm btn-outline-info btn-manage-batches" data-id="${c.id}">Batches</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary btn-assign-teacher" data-id="${c.id}">Teacher</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark btn-assign-students" data-id="${c.id}">Students</button>
                 </td>
             </tr>`;
         });
@@ -244,6 +243,88 @@ $(function () {
     });
 
     $("#refreshCoursesBtn").on("click", loadCourses);
+
+    function loadCourseBatches(cId) {
+        $.get(`/api/admin/batches?courseId=${cId}`).done(function (batches) {
+            if (!batches.length) {
+                $("#courseBatchesList").html('<div class="text-muted small">No batches created for this course yet.</div>');
+                return;
+            }
+            const html = batches.map(b => {
+                const tNames = (b.teachers || []).map(t => escapeHtml(t.fullName)).join(", ") || "No teachers";
+                return `
+                    <div class="border rounded p-2 mb-2 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <strong>${escapeHtml(b.batchName)} (${escapeHtml(b.batchCode)})</strong>
+                            <div class="small text-muted">Teachers: ${tNames} &bull; ${b.startDate} to ${b.endDate} &bull; Enrolled: ${b.enrolledCount}</div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-dark btn-enroll-batch-sec" data-batch-id="${b.id}" data-course-id="${cId}">Enroll Batch 70 Sec A</button>
+                    </div>`;
+            }).join("");
+            $("#courseBatchesList").html(html);
+        });
+    }
+
+    $(document).on("click", ".btn-manage-batches", function () {
+        const id = $(this).data("id");
+        const course = coursesCache.find(c => c.id === id);
+        if (!course) return;
+        $("#batchModalCourseTitle").text(course.title);
+        $("#batchCourseId").val(course.id);
+        const today = new Date().toISOString().split("T")[0];
+        $("#batchStartDate").val(today);
+        $("#batchEndDate").val(today);
+        loadOptions().done(function () {
+            const opts = teacherOptions.map(t => `<option value="${t.id}">${escapeHtml(t.fullName)}</option>`).join("");
+            $("#batchTeacherIdsSelect").html(opts);
+            loadCourseBatches(course.id);
+            manageBatchesModal.show();
+        });
+    });
+
+    $("#createBatchForm").on("submit", function (e) {
+        e.preventDefault();
+        const cId = parseInt($("#batchCourseId").val(), 10);
+        const teacherIds = ($("#batchTeacherIdsSelect").val() || []).map(v => parseInt(v, 10));
+        $.ajax({
+            url: "/api/admin/batches",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                courseId: cId,
+                batchName: $("#batchNameInput").val(),
+                batchCode: $("#batchCodeInput").val(),
+                schedule: $("#batchScheduleInput").val() || null,
+                startDate: $("#batchStartDate").val(),
+                endDate: $("#batchEndDate").val(),
+                status: 1,
+                teacherIds
+            }),
+            success: () => {
+                $("#createBatchForm")[0].reset();
+                loadCourseBatches(cId);
+                loadCourses();
+                showCourseAlert("Batch created with assigned teachers.", "success");
+            },
+            error: xhr => showCourseAlert(xhr.responseJSON?.message || "Failed to create batch.", "danger")
+        });
+    });
+
+    $(document).on("click", ".btn-enroll-batch-sec", function () {
+        const bId = $(this).data("batch-id");
+        const cId = $(this).data("course-id");
+        $.ajax({
+            url: `/api/admin/batches/${bId}/students`,
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ batch: "70", section: "A", studentIds: [] }),
+            success: res => {
+                loadCourseBatches(cId);
+                loadCourses();
+                showCourseAlert(res.message, "success");
+            }
+        });
+    });
 
     loadOptions();
     loadCourses();

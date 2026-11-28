@@ -1,3 +1,5 @@
+using ELearning.Domain.Enums;
+
 namespace ELearning.Domain.Entities;
 
 public class Course
@@ -6,6 +8,8 @@ public class Course
 
     public string Title { get; set; } = string.Empty;
 
+    public string CourseCode { get; set; } = string.Empty;
+
     public string Description { get; set; } = string.Empty;
 
     public string Instructor { get; set; } = string.Empty;
@@ -13,6 +17,10 @@ public class Course
     public string Category { get; set; } = string.Empty;
 
     public int DurationHours { get; set; }
+
+    public int DurationWeeks { get; set; } = 12;
+
+    public CourseStatus Status { get; set; } = CourseStatus.Active;
 
     public bool IsPublished { get; set; }
 
@@ -27,4 +35,8 @@ public class Course
     public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
 
     public ICollection<CourseEnrollment> Enrollments { get; set; } = new List<CourseEnrollment>();
+
+    public ICollection<CourseBatch> Batches { get; set; } = new List<CourseBatch>();
+
+    public ICollection<CourseWeek> Weeks { get; set; } = new List<CourseWeek>();
 }

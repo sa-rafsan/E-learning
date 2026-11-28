@@ -44,8 +44,11 @@ $(function () {
         if (isEdit) {
             $.get(`/api/admin/courses/${courseId}`).done(function (c) {
                 $("#courseTitle").val(c.title || "");
+                $("#courseCode").val(c.courseCode || "");
                 $("#courseCategory").val(c.category || "");
+                $("#courseDurationWeeks").val(c.durationWeeks || 12);
                 $("#courseDuration").val(c.durationHours || 1);
+                $("#courseStatus").val(c.status === "Inactive" ? "2" : "1");
                 $("#courseDescription").val(c.description || "");
                 $("#courseIsPublished").prop("checked", Boolean(c.isPublished));
                 $("#courseImagePath").val(c.imagePath || "");
@@ -58,17 +61,23 @@ $(function () {
     $("#courseForm").on("submit", function (e) {
         e.preventDefault();
         const title = ($("#courseTitle").val() || "").trim();
+        const courseCode = ($("#courseCode").val() || "").trim();
         const category = ($("#courseCategory").val() || "").trim();
         const description = ($("#courseDescription").val() || "").trim();
+        const durationWeeks = parseInt($("#courseDurationWeeks").val(), 10);
         const duration = parseInt($("#courseDuration").val(), 10);
 
         let ok = true;
-        if (!title) { $("#courseTitle").addClass("is-invalid"); $("#courseTitleError").text("Course Title is required."); ok = false; }
+        if (!title) { $("#courseTitle").addClass("is-invalid"); $("#courseTitleError").text("Course Name is required."); ok = false; }
         else { $("#courseTitle").removeClass("is-invalid"); }
+        if (!courseCode) { $("#courseCode").addClass("is-invalid"); $("#courseCodeError").text("Course Code is required."); ok = false; }
+        else { $("#courseCode").removeClass("is-invalid"); }
         if (!category) { $("#courseCategory").addClass("is-invalid"); $("#courseCategoryError").text("Category is required."); ok = false; }
         else { $("#courseCategory").removeClass("is-invalid"); }
         if (!description) { $("#courseDescription").addClass("is-invalid"); $("#courseDescriptionError").text("Description is required."); ok = false; }
         else { $("#courseDescription").removeClass("is-invalid"); }
+        if (!durationWeeks || durationWeeks < 1 || durationWeeks > 52) { $("#courseDurationWeeks").addClass("is-invalid"); $("#courseDurationWeeksError").text("Weeks must be 1–52."); ok = false; }
+        else { $("#courseDurationWeeks").removeClass("is-invalid"); }
         if (!duration || duration < 1) { $("#courseDuration").addClass("is-invalid"); $("#courseDurationError").text("Duration must be at least 1 hour."); ok = false; }
         else { $("#courseDuration").removeClass("is-invalid"); }
 
@@ -84,9 +93,12 @@ $(function () {
             contentType: "application/json",
             data: JSON.stringify({
                 title,
+                courseCode,
                 category,
                 description,
                 durationHours: duration,
+                durationWeeks,
+                status: parseInt($("#courseStatus").val(), 10),
                 teacherId: tVal ? parseInt(tVal, 10) : null,
                 isPublished: $("#courseIsPublished").is(":checked"),
                 imagePath: ($("#courseImagePath").val() || "").trim() || null

@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using ELearning.Application.DTOs;
+using ELearning.Domain.Entities;
 using ELearning.Domain.Enums;
 using ELearning.Infrastructure.Data;
 using ELearning.Infrastructure.Identity;
@@ -37,6 +38,7 @@ public sealed class ProfileApiController(
         var user = await dbContext.Users
             .AsNoTracking()
             .Include(u => u.TeacherProfile)
+                .ThenInclude(t => t!.Qualifications)
             .Include(u => u.StudentProfile)
             .SingleOrDefaultAsync(u => u.Id == userId.Value, cancellationToken);
 
@@ -55,8 +57,96 @@ public sealed class ProfileApiController(
             status = user.Status.ToString(),
             studentId = user.StudentProfile?.StudentId ?? user.StudentId,
             department = user.StudentProfile?.Department ?? user.TeacherProfile?.Department ?? user.Department,
-            imagePath = user.StudentProfile?.ImagePath ?? user.TeacherProfile?.ImagePath
+            imagePath = user.StudentProfile?.ImagePath ?? user.TeacherProfile?.ImagePath,
+            address = user.StudentProfile?.Address ?? user.TeacherProfile?.Address,
+            nationality = user.StudentProfile?.Nationality ?? user.TeacherProfile?.Nationality,
+            country = user.StudentProfile?.Country ?? user.TeacherProfile?.Country,
+            dateOfBirth = user.StudentProfile?.DateOfBirth,
+            gender = user.StudentProfile?.Gender,
+            educationalBackground = user.StudentProfile?.EducationalBackground,
+            specialization = user.TeacherProfile?.Specialization,
+            professionalExperience = user.TeacherProfile?.ProfessionalExperience,
+            shortBiography = user.TeacherProfile?.ShortBiography,
+            qualifications = user.TeacherProfile?.Qualifications.Select(q => new
+            {
+                q.Id,
+                q.DegreeName,
+                q.InstitutionName,
+                q.PassingYear
+            })
         });
+    }
+
+    [HttpPut("profile")]
+    public async Task<IActionResult> UpdateProfile(
+        [FromBody] UpdateSelfProfileDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(dto.FullName))
+        {
+            return BadRequest(new { message = "Full Name is required." });
+        }
+
+        var userId = GetCurrentUserId();
+        if (!userId.HasValue) return Unauthorized();
+
+        var user = await dbContext.Users
+            .Include(u => u.TeacherProfile)
+                .ThenInclude(t => t!.Qualifications)
+            .Include(u => u.StudentProfile)
+            .SingleOrDefaultAsync(u => u.Id == userId.Value, cancellationToken);
+
+        if (user is null) return NotFound();
+
+        var now = DateTime.UtcNow;
+        user.FullName = dto.FullName.Trim();
+        user.PhoneNumber = dto.PhoneNumber?.Trim();
+        user.UpdatedAtUtc = now;
+
+        if (user.TeacherProfile is not null)
+        {
+            var t = user.TeacherProfile;
+            t.FullName = user.FullName;
+            t.PhoneNumber = user.PhoneNumber;
+            t.Address = dto.Address?.Trim();
+            t.Nationality = dto.Nationality?.Trim();
+            t.Country = dto.Country?.Trim();
+            t.Specialization = dto.Specialization?.Trim();
+            t.ProfessionalExperience = dto.ProfessionalExperience?.Trim();
+            t.ShortBiography = dto.ShortBiography?.Trim();
+            t.UpdatedAtUtc = now;
+
+            if (dto.Qualifications is not null)
+            {
+                t.Qualifications.Clear();
+                foreach (var q in dto.Qualifications.Where(q => !string.IsNullOrWhiteSpace(q.DegreeName)))
+                {
+                    t.Qualifications.Add(new TeacherQualification
+                    {
+                        TeacherId = t.Id,
+                        DegreeName = q.DegreeName.Trim(),
+                        InstitutionName = q.InstitutionName.Trim(),
+                        PassingYear = q.PassingYear
+                    });
+                }
+            }
+        }
+        else if (user.StudentProfile is not null)
+        {
+            var s = user.StudentProfile;
+            s.FullName = user.FullName;
+            s.PhoneNumber = user.PhoneNumber;
+            s.Address = dto.Address?.Trim();
+            s.Nationality = dto.Nationality?.Trim();
+            s.Country = dto.Country?.Trim();
+            s.DateOfBirth = dto.DateOfBirth;
+            s.Gender = dto.Gender?.Trim();
+            s.EducationalBackground = dto.EducationalBackground?.Trim();
+            s.UpdatedAtUtc = now;
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "Profile updated successfully." });
     }
 
     [HttpPost("change-password")]

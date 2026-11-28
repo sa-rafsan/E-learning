@@ -138,5 +138,24 @@ $(function () {
             $("#studentAttendanceBody").html('<tr><td colspan="6" class="text-center py-3 text-danger">Unable to load attendance records.</td></tr>');
         });
 
+    $.get("/api/workspace/my-courses").done(function (courses) {
+        if (!courses.length) {
+            $("#studentWorkspaceCoursesRow").html('<div class="col-12 text-muted small">No courses enrolled yet.</div>');
+            return;
+        }
+        const html = courses.map(c => `
+            <div class="col-md-4">
+                <div class="border rounded p-3 bg-light h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="badge bg-info-subtle text-info-emphasis mb-1">${escapeHtml(c.courseCode || "COURSE")}</span>
+                        <div class="fw-bold small">${escapeHtml(c.title)}</div>
+                        <div class="text-muted" style="font-size:0.75rem;">${c.durationWeeks || 12} Weeks</div>
+                    </div>
+                    <a href="/Workspace/Course/${c.id}" class="btn btn-dark btn-sm mt-2">Open Course Workspace</a>
+                </div>
+            </div>`).join("");
+        $("#studentWorkspaceCoursesRow").html(html);
+    });
+
     loadCourseProgress();
 });

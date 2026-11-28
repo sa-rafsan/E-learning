@@ -55,18 +55,36 @@ public sealed class AdminCourseService(
             }
         }
 
+        var weeksCount = Math.Clamp(dto.DurationWeeks, 1, 52);
+        var courseCode = string.IsNullOrWhiteSpace(dto.CourseCode)
+            ? $"CRS-{DateTime.UtcNow:yyMMddHHmm}"
+            : dto.CourseCode.Trim().ToUpperInvariant();
+
         var course = new Course
         {
             Title = dto.Title.Trim(),
+            CourseCode = courseCode,
             Description = dto.Description.Trim(),
             Category = dto.Category.Trim(),
             DurationHours = dto.DurationHours,
+            DurationWeeks = weeksCount,
+            Status = dto.Status,
             IsPublished = dto.IsPublished,
             TeacherId = teacher?.Id,
             Instructor = teacher?.FullName ?? "TBA",
             ImagePath = string.IsNullOrWhiteSpace(dto.ImagePath) ? null : dto.ImagePath.Trim(),
             CreatedAtUtc = DateTime.UtcNow
         };
+
+        for (var w = 1; w <= weeksCount; w++)
+        {
+            course.Weeks.Add(new CourseWeek
+            {
+                WeekNumber = w,
+                Title = $"Week {w:D2}",
+                AssignedTeacherId = teacher?.Id
+            });
+        }
 
         await courseRepository.AddCourseAsync(course, cancellationToken);
         await courseRepository.SaveChangesAsync(cancellationToken);
@@ -106,16 +124,38 @@ public sealed class AdminCourseService(
             }
         }
 
+        var weeksCount = Math.Clamp(dto.DurationWeeks, 1, 52);
         course.Title = dto.Title.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.CourseCode))
+        {
+            course.CourseCode = dto.CourseCode.Trim().ToUpperInvariant();
+        }
         course.Description = dto.Description.Trim();
         course.Category = dto.Category.Trim();
         course.DurationHours = dto.DurationHours;
+        course.DurationWeeks = weeksCount;
+        course.Status = dto.Status;
         course.IsPublished = dto.IsPublished;
         course.TeacherId = teacher?.Id;
         course.Instructor = teacher?.FullName ?? "TBA";
         if (!string.IsNullOrWhiteSpace(dto.ImagePath))
         {
             course.ImagePath = dto.ImagePath.Trim();
+        }
+
+        var existingWeekNumbers = course.Weeks.Select(w => w.WeekNumber).ToHashSet();
+        for (var w = 1; w <= weeksCount; w++)
+        {
+            if (!existingWeekNumbers.Contains(w))
+            {
+                course.Weeks.Add(new CourseWeek
+                {
+                    CourseId = course.Id,
+                    WeekNumber = w,
+                    Title = $"Week {w:D2}",
+                    AssignedTeacherId = teacher?.Id
+                });
+            }
         }
 
         await courseRepository.SaveChangesAsync(cancellationToken);
@@ -228,14 +268,19 @@ public sealed class AdminCourseService(
     {
         Id = course.Id,
         Title = course.Title,
+        CourseCode = course.CourseCode,
         Description = course.Description,
         Category = course.Category,
         DurationHours = course.DurationHours,
+        DurationWeeks = course.DurationWeeks,
+        Status = course.Status.ToString(),
         IsPublished = course.IsPublished,
         TeacherId = course.TeacherId,
         TeacherName = course.Teacher?.FullName ?? course.Instructor,
         ImagePath = course.ImagePath,
         EnrolledStudentsCount = course.Enrollments.Count,
+        BatchesCount = course.Batches.Count,
+        WeeksCount = course.Weeks.Count,
         EnrolledStudentIds = course.Enrollments.Select(e => e.StudentId).ToList()
     };
 }

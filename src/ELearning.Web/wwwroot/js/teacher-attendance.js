@@ -242,7 +242,29 @@ $(function () {
         });
     });
 
+    function loadAssignedCourses() {
+        $.get("/api/workspace/my-courses").done(function (courses) {
+            if (!courses.length) {
+                $("#teacherAssignedCoursesRow").html('<div class="col-12 text-muted small">No courses assigned yet.</div>');
+                return;
+            }
+            const html = courses.map(c => `
+                <div class="col-md-4">
+                    <div class="border rounded p-3 bg-light h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <span class="badge bg-primary-subtle text-primary mb-1">${escapeHtml(c.courseCode || "COURSE")}</span>
+                            <div class="fw-bold small">${escapeHtml(c.title)}</div>
+                            <div class="text-muted" style="font-size:0.75rem;">${c.durationWeeks || 12} Weeks &bull; ${(c.batches || []).length} Batches</div>
+                        </div>
+                        <a href="/Workspace/Course/${c.id}" class="btn btn-primary btn-sm mt-2">Open Course Workspace</a>
+                    </div>
+                </div>`).join("");
+            $("#teacherAssignedCoursesRow").html(html);
+        });
+    }
+
     setTodayDate();
     loadCourses();
+    loadAssignedCourses();
     loadSessionsHistory();
 });

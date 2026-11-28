@@ -17,6 +17,26 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<LessonProgress> LessonProgresses => Set<LessonProgress>();
 
+    public DbSet<TeacherQualification> TeacherQualifications => Set<TeacherQualification>();
+
+    public DbSet<CourseBatch> CourseBatches => Set<CourseBatch>();
+
+    public DbSet<BatchTeacher> BatchTeachers => Set<BatchTeacher>();
+
+    public DbSet<CourseWeek> CourseWeeks => Set<CourseWeek>();
+
+    public DbSet<WeekTopic> WeekTopics => Set<WeekTopic>();
+
+    public DbSet<WeekMaterial> WeekMaterials => Set<WeekMaterial>();
+
+    public DbSet<WeekActivity> WeekActivities => Set<WeekActivity>();
+
+    public DbSet<ActivityQuestion> ActivityQuestions => Set<ActivityQuestion>();
+
+    public DbSet<ActivitySubmission> ActivitySubmissions => Set<ActivitySubmission>();
+
+    public DbSet<ForumPost> ForumPosts => Set<ForumPost>();
+
     public DbSet<Teacher> Teachers => Set<Teacher>();
 
     public DbSet<Student> Students => Set<Student>();
@@ -34,10 +54,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Course>(entity =>
         {
             entity.Property(course => course.Title).HasMaxLength(160).IsRequired();
+            entity.Property(course => course.CourseCode).HasMaxLength(40).IsRequired();
             entity.Property(course => course.Description).HasMaxLength(2000).IsRequired();
             entity.Property(course => course.Instructor).HasMaxLength(120).IsRequired();
             entity.Property(course => course.Category).HasMaxLength(80).IsRequired();
             entity.Property(course => course.ImagePath).HasMaxLength(500);
+            entity.Property(course => course.DurationWeeks).HasDefaultValue(12);
             entity.HasMany(course => course.Lessons)
                 .WithOne(lesson => lesson.Course)
                 .HasForeignKey(lesson => lesson.CourseId)
@@ -58,10 +80,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .HasForeignKey(enrollment => enrollment.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            entity.HasOne(enrollment => enrollment.Batch)
+                .WithMany(batch => batch.Enrollments)
+                .HasForeignKey(enrollment => enrollment.CourseBatchId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             entity.HasOne(enrollment => enrollment.Student)
-                .WithMany()
+                .WithMany(student => student.Enrollments)
                 .HasForeignKey(enrollment => enrollment.StudentId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<LessonProgress>(entity =>
@@ -178,6 +205,147 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithMany()
                 .HasForeignKey(record => record.StudentId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TeacherQualification>(entity =>
+        {
+            entity.Property(q => q.DegreeName).HasMaxLength(160).IsRequired();
+            entity.Property(q => q.InstitutionName).HasMaxLength(200).IsRequired();
+            entity.HasOne(q => q.Teacher)
+                .WithMany(t => t.Qualifications)
+                .HasForeignKey(q => q.TeacherId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CourseBatch>(entity =>
+        {
+            entity.Property(b => b.BatchName).HasMaxLength(120).IsRequired();
+            entity.Property(b => b.BatchCode).HasMaxLength(40).IsRequired();
+            entity.Property(b => b.Schedule).HasMaxLength(200);
+            entity.HasIndex(b => new { b.CourseId, b.BatchCode }).IsUnique();
+            entity.HasOne(b => b.Course)
+                .WithMany(c => c.Batches)
+                .HasForeignKey(b => b.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<BatchTeacher>(entity =>
+        {
+            entity.HasIndex(bt => new { bt.CourseBatchId, bt.TeacherId }).IsUnique();
+            entity.HasOne(bt => bt.Batch)
+                .WithMany(b => b.BatchTeachers)
+                .HasForeignKey(bt => bt.CourseBatchId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(bt => bt.Teacher)
+                .WithMany(t => t.BatchAssignments)
+                .HasForeignKey(bt => bt.TeacherId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<CourseWeek>(entity =>
+        {
+            entity.Property(w => w.Title).HasMaxLength(200).IsRequired();
+            entity.Property(w => w.Description).HasMaxLength(2000);
+            entity.Property(w => w.LearningObjectives).HasMaxLength(2000);
+            entity.HasIndex(w => new { w.CourseId, w.WeekNumber }).IsUnique();
+            entity.HasOne(w => w.Course)
+                .WithMany(c => c.Weeks)
+                .HasForeignKey(w => w.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(w => w.AssignedTeacher)
+                .WithMany()
+                .HasForeignKey(w => w.AssignedTeacherId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<WeekTopic>(entity =>
+        {
+            entity.Property(t => t.Title).HasMaxLength(200).IsRequired();
+            entity.Property(t => t.Description).HasMaxLength(1000);
+            entity.HasOne(t => t.Week)
+                .WithMany(w => w.Topics)
+                .HasForeignKey(t => t.CourseWeekId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<WeekMaterial>(entity =>
+        {
+            entity.Property(m => m.Title).HasMaxLength(200).IsRequired();
+            entity.Property(m => m.MaterialType).HasMaxLength(40).IsRequired();
+            entity.Property(m => m.FilePath).HasMaxLength(500);
+            entity.Property(m => m.ExternalUrl).HasMaxLength(500);
+            entity.HasOne(m => m.Week)
+                .WithMany(w => w.Materials)
+                .HasForeignKey(m => m.CourseWeekId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<WeekActivity>(entity =>
+        {
+            entity.Property(a => a.Title).HasMaxLength(200).IsRequired();
+            entity.Property(a => a.Instructions).HasMaxLength(4000);
+            entity.Property(a => a.RequiredTasks).HasMaxLength(2000);
+            entity.Property(a => a.AttachmentPath).HasMaxLength(500);
+            entity.Property(a => a.MaxMarks).HasPrecision(8, 2);
+            entity.Property(a => a.PassingMarks).HasPrecision(8, 2);
+            entity.HasOne(a => a.Week)
+                .WithMany(w => w.Activities)
+                .HasForeignKey(a => a.CourseWeekId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(a => a.Batch)
+                .WithMany()
+                .HasForeignKey(a => a.CourseBatchId)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(a => a.Teacher)
+                .WithMany()
+                .HasForeignKey(a => a.TeacherId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<ActivityQuestion>(entity =>
+        {
+            entity.Property(q => q.QuestionText).HasMaxLength(1000).IsRequired();
+            entity.Property(q => q.OptionA).HasMaxLength(400);
+            entity.Property(q => q.OptionB).HasMaxLength(400);
+            entity.Property(q => q.OptionC).HasMaxLength(400);
+            entity.Property(q => q.OptionD).HasMaxLength(400);
+            entity.Property(q => q.CorrectOption).HasMaxLength(200);
+            entity.Property(q => q.Marks).HasPrecision(8, 2);
+            entity.HasOne(q => q.Activity)
+                .WithMany(a => a.Questions)
+                .HasForeignKey(q => q.WeekActivityId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ActivitySubmission>(entity =>
+        {
+            entity.Property(s => s.AttachmentPath).HasMaxLength(500);
+            entity.Property(s => s.Feedback).HasMaxLength(2000);
+            entity.Property(s => s.ObtainedMarks).HasPrecision(8, 2);
+            entity.HasIndex(s => new { s.WeekActivityId, s.StudentId }).IsUnique();
+            entity.HasOne(s => s.Activity)
+                .WithMany(a => a.Submissions)
+                .HasForeignKey(s => s.WeekActivityId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(s => s.Student)
+                .WithMany()
+                .HasForeignKey(s => s.StudentId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<ForumPost>(entity =>
+        {
+            entity.Property(p => p.AuthorName).HasMaxLength(120).IsRequired();
+            entity.Property(p => p.AuthorRole).HasMaxLength(40).IsRequired();
+            entity.Property(p => p.Content).HasMaxLength(2000).IsRequired();
+            entity.HasOne(p => p.Activity)
+                .WithMany(a => a.ForumPosts)
+                .HasForeignKey(p => p.WeekActivityId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(p => p.ParentPost)
+                .WithMany()
+                .HasForeignKey(p => p.ParentPostId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<RefreshToken>(entity =>
